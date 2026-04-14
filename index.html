@@ -53,6 +53,16 @@ body {
   padding:10px;
 }
 
+/* شاشة الإدخال */
+.display {
+  background:#000;
+  padding:15px;
+  font-size:28px;
+  text-align:center;
+  border-radius:10px;
+  margin-bottom:10px;
+}
+
 .pumps {
   display:grid;
   grid-template-columns: repeat(2,1fr);
@@ -129,6 +139,9 @@ body {
 <div class="center">
 <h3>المضخات</h3>
 
+<!-- شاشة الإدخال -->
+<div class="display" id="display">0</div>
+
 <div class="pumps">
 
 <div class="pump" onclick="selectPump(this,1,'بنزين',58.97)">
@@ -154,16 +167,16 @@ body {
 </div>
 
 <div class="keypad">
-<button onclick="add(7)">٧</button>
-<button onclick="add(8)">٨</button>
-<button onclick="add(9)">٩</button>
-<button onclick="add(4)">٤</button>
-<button onclick="add(5)">٥</button>
-<button onclick="add(6)">٦</button>
-<button onclick="add(1)">١</button>
-<button onclick="add(2)">٢</button>
-<button onclick="add(3)">٣</button>
-<button onclick="add(0)">٠</button>
+<button onclick="add(7)">7</button>
+<button onclick="add(8)">8</button>
+<button onclick="add(9)">9</button>
+<button onclick="add(4)">4</button>
+<button onclick="add(5)">5</button>
+<button onclick="add(6)">6</button>
+<button onclick="add(1)">1</button>
+<button onclick="add(2)">2</button>
+<button onclick="add(3)">3</button>
+<button onclick="add(0)">0</button>
 <button onclick="clearInput()">مسح</button>
 </div>
 </div>
@@ -198,10 +211,12 @@ function selectPump(el, p, type, price){
 
 function add(n){
   input += n;
+  document.getElementById("display").innerText = input;
 }
 
 function clearInput(){
   input = "";
+  document.getElementById("display").innerText = "0";
 }
 
 function startFuel(){
@@ -218,6 +233,7 @@ function startFuel(){
     "المجموع: " + total.toFixed(2) + " أوقية";
 
   input = "";
+  document.getElementById("display").innerText = "0";
 }
 
 function pay(){
