@@ -2,7 +2,7 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>Fuel POS Pro</title>
+<title>نظام محطة الوقود</title>
 
 <style>
 body {
@@ -10,6 +10,7 @@ body {
   font-family: Arial;
   background:#0b132b;
   color:white;
+  direction: rtl;
 }
 
 .container {
@@ -102,6 +103,7 @@ body {
   margin:5px 0;
   border:none;
   border-radius:10px;
+  font-size:18px;
 }
 
 .green {background:#22c55e;}
@@ -119,7 +121,7 @@ body {
 <div class="left">
 <h3>الفاتورة</h3>
 <div class="bill" id="bill"></div>
-<div class="total" id="total">المجموع: 0 MRU</div>
+<div class="total" id="total">المجموع: 0 أوقية</div>
 <button class="pay" onclick="pay()">💳 دفع</button>
 </div>
 
@@ -129,7 +131,6 @@ body {
 
 <div class="pumps">
 
-<!-- بنزين -->
 <div class="pump" onclick="selectPump(this,1,'بنزين',58.97)">
 <img src="https://cdn-icons-png.flaticon.com/512/2972/2972185.png">
 <p>بنزين - مضخة 1</p>
@@ -140,7 +141,6 @@ body {
 <p>بنزين - مضخة 2</p>
 </div>
 
-<!-- ديزل -->
 <div class="pump" onclick="selectPump(this,3,'ديزل',56.35)">
 <img src="https://cdn-icons-png.flaticon.com/512/2972/2972185.png">
 <p>ديزل - مضخة 3</p>
@@ -154,27 +154,27 @@ body {
 </div>
 
 <div class="keypad">
-<button onclick="add(7)">7</button>
-<button onclick="add(8)">8</button>
-<button onclick="add(9)">9</button>
-<button onclick="add(4)">4</button>
-<button onclick="add(5)">5</button>
-<button onclick="add(6)">6</button>
-<button onclick="add(1)">1</button>
-<button onclick="add(2)">2</button>
-<button onclick="add(3)">3</button>
-<button onclick="add(0)">0</button>
-<button onclick="clearInput()">CLR</button>
+<button onclick="add(7)">٧</button>
+<button onclick="add(8)">٨</button>
+<button onclick="add(9)">٩</button>
+<button onclick="add(4)">٤</button>
+<button onclick="add(5)">٥</button>
+<button onclick="add(6)">٦</button>
+<button onclick="add(1)">١</button>
+<button onclick="add(2)">٢</button>
+<button onclick="add(3)">٣</button>
+<button onclick="add(0)">٠</button>
+<button onclick="clearInput()">مسح</button>
 </div>
 </div>
 
 <!-- RIGHT -->
 <div class="right">
-<button class="btn green" onclick="startFuel()">START</button>
-<button class="btn gray">PREPAY</button>
-<button class="btn gray">TRANSFER</button>
-<button class="btn red">STOP</button>
-<button class="btn red" onclick="cancel()">CANCEL</button>
+<button class="btn green" onclick="startFuel()">ابدأ الضخ</button>
+<button class="btn gray">دفع مسبق</button>
+<button class="btn gray">تحويل</button>
+<button class="btn red">إيقاف</button>
+<button class="btn red" onclick="cancel()">إلغاء</button>
 </div>
 
 </div>
@@ -212,16 +212,16 @@ function startFuel(){
   total += cost;
 
   document.getElementById("bill").innerHTML +=
-    `<p>${fuelType} - مضخة ${pump} - ${liters}L = ${cost.toFixed(2)} MRU</p>`;
+    `<p>${fuelType} - مضخة ${pump} - ${liters} لتر = ${cost.toFixed(2)} أوقية</p>`;
 
   document.getElementById("total").innerText =
-    "المجموع: " + total.toFixed(2) + " MRU";
+    "المجموع: " + total.toFixed(2) + " أوقية";
 
   input = "";
 }
 
 function pay(){
-  alert("تم الدفع: " + total.toFixed(2) + " MRU");
+  alert("تم الدفع: " + total.toFixed(2) + " أوقية");
   location.reload();
 }
 
