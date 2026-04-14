@@ -4,153 +4,56 @@
 <meta charset="UTF-8">
 <title>Fuel Pro Cloud</title>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <style>
-body{
- font-family:Arial;
- background:#f1f5f9;
- direction:rtl;
- margin:0;
-}
+body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 
-/* 🔐 LOGIN */
+/* LOGIN */
 #loginBox{
- position:fixed;
- top:0;left:0;width:100%;height:100%;
- background:#000000cc;
- display:flex;
- justify-content:center;
- align-items:center;
+ position:fixed;top:0;left:0;width:100%;height:100%;
+ background:#000000cc;display:flex;justify-content:center;align-items:center;
 }
 .login-card{
- background:white;
- padding:40px;
- border-radius:25px;
- width:320px;
- text-align:center;
+ background:white;padding:40px;border-radius:25px;width:320px;text-align:center;
 }
-.login-card input{
- width:100%;
- padding:15px;
- margin:10px 0;
- font-size:20px;
-}
-.login-card button{
- width:100%;
- padding:18px;
- font-size:20px;
- background:#c9a24b;
- color:white;
- border:none;
- border-radius:15px;
-}
+.login-card input{width:100%;padding:15px;margin:10px 0;font-size:20px}
+.login-card button{width:100%;padding:18px;font-size:20px;background:#c9a24b;color:white;border:none;border-radius:15px}
 
 /* UI */
 .container{padding:15px}
-.card{
- background:linear-gradient(135deg,#c9a24b,#a67c2d);
- color:white;
- padding:20px;
- border-radius:20px;
- font-size:22px;
- text-align:center;
-}
+.card{background:linear-gradient(135deg,#c9a24b,#a67c2d);color:white;padding:20px;border-radius:20px;text-align:center;font-size:22px}
 
-/* stock */
 .stock{
- background:white;
- padding:15px;
- margin-top:10px;
- border-radius:15px;
- display:flex;
- justify-content:space-between;
- align-items:center;
- font-size:20px;
+ background:white;padding:15px;margin-top:10px;border-radius:15px;
+ display:flex;justify-content:space-between;align-items:center;font-size:20px;
 }
-.stock button{
- background:#22c55e;
- color:white;
- border:none;
- padding:10px 15px;
- border-radius:10px;
- font-size:16px;
-}
+.stock button{background:#22c55e;color:white;border:none;padding:10px 15px;border-radius:10px}
 
-/* display */
 .display{
- background:white;
- padding:30px;
- font-size:40px;
- text-align:center;
- margin:15px 0;
- border-radius:15px;
- color:#c9a24b;
- font-weight:bold;
+ background:white;padding:30px;font-size:40px;text-align:center;margin:15px 0;border-radius:15px;
+ color:#c9a24b;font-weight:bold;
 }
 
-/* 🔥 pumps BIG */
-.pumps{
- display:grid;
- grid-template-columns:repeat(2,1fr);
- gap:20px;
-}
-
+/* pumps */
+.pumps{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
 .pump{
- padding:60px;
- font-size:26px;
- border-radius:25px;
- text-align:center;
- font-weight:bold;
- box-shadow:0 8px 20px rgba(0,0,0,0.2);
- cursor:pointer;
- transition:0.3s;
+ padding:60px;font-size:26px;border-radius:25px;text-align:center;
+ font-weight:bold;box-shadow:0 8px 20px rgba(0,0,0,0.2);cursor:pointer;
 }
-
-.pump:active{
- transform:scale(0.95);
-}
-
 .petrol{background:#22c55e;color:white}
 .diesel{background:#facc15}
 
-/* keypad BIG */
-.keypad{
- display:none;
- grid-template-columns:repeat(3,1fr);
- gap:15px;
- margin-top:15px;
-}
+/* keypad */
+.keypad{display:none;grid-template-columns:repeat(3,1fr);gap:15px}
+.keypad button{padding:25px;font-size:22px;border-radius:15px}
 
-.keypad button{
- padding:25px;
- font-size:22px;
- border-radius:15px;
- border:none;
- background:#e5e7eb;
-}
-
-/* actions BIG */
-.actions{
- display:grid;
- grid-template-columns:repeat(3,1fr);
- gap:15px;
- margin-top:15px;
-}
-
-.btn{
- padding:20px;
- font-size:20px;
- border:none;
- border-radius:15px;
- font-weight:bold;
-}
-
+/* actions */
+.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:15px}
+.btn{padding:20px;font-size:20px;border:none;border-radius:15px}
 .green{background:#c9a24b;color:white}
 .red{background:#ef4444;color:white}
-
 </style>
 </head>
 
@@ -192,7 +95,7 @@ body{
 
 <div class="actions">
 <button class="btn green" onclick="startFuel()">ابدأ</button>
-<button class="btn" onclick="openLog()">📋</button>
+<button class="btn" onclick="openLog()">📋 السجل</button>
 <button class="btn red" onclick="cancel()">إلغاء</button>
 </div>
 
@@ -205,10 +108,7 @@ const firebaseConfig = {
  apiKey: "AIzaSyA7pNxijt03_TzDDNnwFbqhyUU-zcbJiq4",
  authDomain: "pkka7-a75c0.firebaseapp.com",
  databaseURL: "https://pkka7-a75c0-default-rtdb.firebaseio.com",
- projectId: "pkka7-a75c0",
- storageBucket: "pkka7-a75c0.firebasestorage.app",
- messagingSenderId: "730135985362",
- appId: "1:730135985362:web:8cf4bfd291e36e936d010b"
+ projectId: "pkka7-a75c0"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -239,9 +139,9 @@ db.ref("stock").on("value", s=>{
   petrol=d.petrol;
   d1=d.d1;
   d2=d.d2;
-  pStock.innerText=petrol;
-  d1Stock.innerText=d1;
-  d2Stock.innerText=d2;
+  pStock.innerText=petrol.toFixed(2);
+  d1Stock.innerText=d1.toFixed(2);
+  d2Stock.innerText=d2.toFixed(2);
  }
 });
 
@@ -271,26 +171,29 @@ function selectPump(p,t,pr){
 function add(n){input+=n;display.innerText=input;}
 function clearInput(){input="";display.innerText="0";}
 
-/* start */
+/* 🔥 MONEY MODE */
 function startFuel(){
- let l=parseFloat(input||0);
- if(!l)return;
 
- if(type==="بنزين"){if(l>petrol)return;petrol-=l;}
- else{
-  if(pump==3){if(l>d1)return;d1-=l;}
-  else{if(l>d2)return;d2-=l;}
+ let money=parseFloat(input||0);
+ if(!money)return alert("ادخل المبلغ");
+
+ let liters=money/price;
+
+ if(type==="بنزين"){
+  if(liters>petrol)return alert("المخزون غير كافي");
+  petrol-=liters;
+ }else{
+  if(pump==3){if(liters>d1)return alert("المخزون غير كافي"); d1-=liters;}
+  else{if(liters>d2)return alert("المخزون غير كافي"); d2-=liters;}
  }
 
  db.ref("stock").set({petrol,d1,d2});
 
- let cost=l*price;
-
  db.ref("logs").push({
   type:type,
   pump:pump,
-  liters:l,
-  amount:cost
+  liters:liters,
+  amount:money
  });
 
  input="";
@@ -298,13 +201,36 @@ function startFuel(){
  keypad.style.display="none";
 }
 
-/* log */
+/* 🔥 ADVANCED LOG */
 function openLog(){
- let txt="";
+
+ let total=0;
+ let dieselLiters=0;
+ let petrolMoney=0;
+
+ let details="";
+
  logs.forEach(l=>{
-  txt+=`${l.type} - ${l.liters}L = ${l.amount}\n`;
+  total+=l.amount;
+
+  if(l.type==="ديزل") dieselLiters+=l.liters;
+  if(l.type==="بنزين") petrolMoney+=l.amount;
+
+  details+=`${l.type} - ${l.amount} MRU - ${l.liters.toFixed(2)}L\n`;
  });
- alert(txt||"لا يوجد سجل");
+
+ alert(`
+📊 التقرير
+
+💰 مجموع المبيعات: ${total.toFixed(2)}
+
+⛽ لترات المازوت: ${dieselLiters.toFixed(2)}
+
+🟢 مبيعات البنزين: ${petrolMoney.toFixed(2)}
+
+----------------
+${details}
+`);
 }
 
 function cancel(){
