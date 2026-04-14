@@ -46,7 +46,6 @@ body {
   border-radius:12px;
   margin-top:10px;
   color:white;
-  font-weight:bold;
 }
 
 /* CENTER */
@@ -55,7 +54,15 @@ body {
   padding:10px;
 }
 
-/* شاشة احترافية */
+/* المخزون */
+.stock {
+  background:#0f3b5f;
+  padding:10px;
+  border-radius:10px;
+  margin-bottom:15px;
+}
+
+/* شاشة */
 .display {
   background:#000;
   padding:20px;
@@ -64,8 +71,6 @@ body {
   border-radius:15px;
   margin-bottom:15px;
   color:#00ffcc;
-  font-weight:bold;
-  box-shadow: inset 0 0 10px rgba(0,255,200,0.5);
 }
 
 /* مضخات */
@@ -81,17 +86,10 @@ body {
   text-align:center;
   border-radius:20px;
   cursor:pointer;
-  transition:0.3s;
-  box-shadow:0 5px 15px rgba(0,0,0,0.3);
-}
-
-.pump:hover {
-  transform:translateY(-5px);
 }
 
 .pump.active {
   background:#22c55e;
-  box-shadow:0 0 20px rgba(34,197,94,0.8);
 }
 
 .pump img {
@@ -111,16 +109,8 @@ body {
   font-size:20px;
   border:none;
   border-radius:15px;
-  background: linear-gradient(45deg, #3b82f6, #2563eb);
+  background:#2563eb;
   color:white;
-  font-weight:bold;
-  transition:0.2s;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-}
-
-.keypad button:active {
-  transform:scale(0.9);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
 }
 
 /* RIGHT */
@@ -136,36 +126,12 @@ body {
   border:none;
   border-radius:15px;
   font-size:20px;
-  font-weight:bold;
   color:white;
-  text-align:center;
-  transition:0.2s;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
-/* ضغط */
-.btn:active {
-  transform:scale(0.95);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-}
-
-/* ألوان */
-.green {
-  background: linear-gradient(45deg, #22c55e, #16a34a);
-}
-
-.red {
-  background: linear-gradient(45deg, #ef4444, #dc2626);
-}
-
-.gray {
-  background: linear-gradient(45deg, #3b82f6, #2563eb);
-}
-
-/* Glow */
-.btn:hover {
-  box-shadow: 0 0 15px rgba(255,255,255,0.3);
-}
+.green {background:#22c55e;}
+.red {background:#ef4444;}
+.gray {background:#3b82f6;}
 
 </style>
 </head>
@@ -184,7 +150,13 @@ body {
 
 <!-- CENTER -->
 <div class="center">
-<h3>المضخات</h3>
+
+<!-- 🔥 المخزون -->
+<div class="stock">
+<h4>المخزون</h4>
+<p id="petrolStock">بنزين: 1000 لتر</p>
+<p id="dieselStock">مازوت: 1000 لتر</p>
+</div>
 
 <div class="display" id="display">0</div>
 
@@ -241,79 +213,86 @@ body {
 
 <script>
 
-// 🔊 صوت يعمل على iPhone
+// 🔊 صوت
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-function beep(freq, time, volume){
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-
-  osc.frequency.value = freq;
-  gain.gain.value = volume;
-
-  osc.start();
-  osc.stop(audioCtx.currentTime + time);
+function beep(freq,time,vol){
+  let o=audioCtx.createOscillator();
+  let g=audioCtx.createGain();
+  o.connect(g); g.connect(audioCtx.destination);
+  o.frequency.value=freq;
+  g.gain.value=vol;
+  o.start(); o.stop(audioCtx.currentTime+time);
 }
+function clickSound(){beep(800,0.05,0.1);}
+function successSound(){beep(1200,0.1,0.2);}
+function errorSound(){beep(200,0.2,0.2);}
 
-function clickSound(){ beep(800,0.05,0.1); }
-function successSound(){ beep(1200,0.1,0.2); }
-function errorSound(){ beep(200,0.2,0.2); }
+// 🛢️ المخزون
+let petrolStock = 1000;
+let dieselStock = 1000;
 
 // النظام
-let pump = null;
-let input = "";
-let total = 0;
-let fuelType = "";
-let pricePerLiter = 0;
+let pump=null,input="",total=0,fuelType="",pricePerLiter=0;
 
-function selectPump(el, p, type, price){
+function selectPump(el,p,type,price){
   document.querySelectorAll(".pump").forEach(x=>x.classList.remove("active"));
   el.classList.add("active");
-
-  pump = p;
-  fuelType = type;
-  pricePerLiter = price;
+  pump=p; fuelType=type; pricePerLiter=price;
 }
 
 function add(n){
-  input += n;
-  document.getElementById("display").innerText = input;
+  input+=n;
+  document.getElementById("display").innerText=input;
   clickSound();
 }
 
 function clearInput(){
-  input = "";
-  document.getElementById("display").innerText = "0";
+  input="";
+  document.getElementById("display").innerText="0";
 }
 
 function startFuel(){
-  if(!pump){
-    errorSound();
-    return alert("اختر مضخة");
+  if(!pump){errorSound(); return alert("اختر مضخة");}
+
+  let liters=parseFloat(input||0);
+
+  if(liters<=0){errorSound(); return alert("أدخل كمية");}
+
+  if(fuelType==="بنزين" && liters>petrolStock){
+    errorSound(); return alert("لا يوجد بنزين كافي");
   }
 
-  let liters = parseFloat(input || 0);
-  let cost = liters * pricePerLiter;
-  total += cost;
+  if(fuelType==="ديزل" && liters>dieselStock){
+    errorSound(); return alert("لا يوجد مازوت كافي");
+  }
+
+  if(fuelType==="بنزين"){petrolStock-=liters;}
+  else{dieselStock-=liters;}
+
+  document.getElementById("petrolStock").innerText =
+    "بنزين: "+petrolStock.toFixed(2)+" لتر";
+
+  document.getElementById("dieselStock").innerText =
+    "مازوت: "+dieselStock.toFixed(2)+" لتر";
+
+  let cost=liters*pricePerLiter;
+  total+=cost;
 
   successSound();
 
-  document.getElementById("bill").innerHTML +=
+  document.getElementById("bill").innerHTML+=
     `<p>${fuelType} - مضخة ${pump} - ${liters} لتر = ${cost.toFixed(2)} أوقية</p>`;
 
   document.getElementById("total").innerText =
-    "المجموع: " + total.toFixed(2) + " أوقية";
+    "المجموع: "+total.toFixed(2)+" أوقية";
 
-  input = "";
-  document.getElementById("display").innerText = "0";
+  input="";
+  document.getElementById("display").innerText="0";
 }
 
 function pay(){
   successSound();
-  alert("تم الدفع: " + total.toFixed(2) + " أوقية");
+  alert("تم الدفع: "+total.toFixed(2)+" أوقية");
   location.reload();
 }
 
