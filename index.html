@@ -15,7 +15,6 @@ body {
 
 .container {padding:15px;}
 
-/* البطاقة */
 .card {
   background: linear-gradient(135deg,#c9a24b,#a67c2d);
   color:white;
@@ -25,11 +24,7 @@ body {
 }
 
 /* المخزون */
-.stock {
-  display:grid;
-  gap:10px;
-  margin-bottom:10px;
-}
+.stock {display:grid;gap:10px;margin-bottom:10px;}
 
 .stock-card {
   background:white;
@@ -80,9 +75,9 @@ body {
   border:2px solid #c9a24b;
 }
 
-/* الأرقام */
+/* 🔥 لوحة الأرقام مخفية */
 .keypad {
-  display:grid;
+  display:none;
   grid-template-columns:repeat(3,1fr);
   gap:10px;
   margin-top:10px;
@@ -123,14 +118,12 @@ body {
 
 <div class="container">
 
-<!-- البطاقة -->
 <div class="card">
 <h3>⛽ محطة الوقود</h3>
 </div>
 
 <!-- المخزون -->
 <div class="stock">
-
 <div class="stock-card">
 ⛽ البنزين: <span id="petrolStock">2000</span> لتر
 <button onclick="refill('petrol')">+</button>
@@ -145,7 +138,6 @@ body {
 🟡 مازوت 2: <span id="diesel2Stock">1000</span> لتر
 <button onclick="refill('diesel2')">+</button>
 </div>
-
 </div>
 
 <!-- الشاشة -->
@@ -153,16 +145,14 @@ body {
 
 <!-- المضخات -->
 <div class="pumps">
-
 <div class="pump" onclick="selectPump(this,1,'بنزين',58.97)">⛽ بنزين 1</div>
 <div class="pump" onclick="selectPump(this,2,'بنزين',58.97)">⛽ بنزين 2</div>
 <div class="pump" onclick="selectPump(this,3,'ديزل',56.35)">⛽ ديزل 1</div>
 <div class="pump" onclick="selectPump(this,4,'ديزل',56.35)">⛽ ديزل 2</div>
-
 </div>
 
-<!-- الأرقام -->
-<div class="keypad">
+<!-- لوحة الأرقام -->
+<div class="keypad" id="keypad">
 <button onclick="add(7)">7</button>
 <button onclick="add(8)">8</button>
 <button onclick="add(9)">9</button>
@@ -179,7 +169,7 @@ body {
 <!-- الأزرار -->
 <div class="actions">
 <button class="btn green" onclick="startFuel()">ابدأ</button>
-<button class="btn gray" onclick="showBill()">📋 السجل</button>
+<button class="btn gray">📋 السجل</button>
 <button class="btn red" onclick="cancel()">إلغاء</button>
 </div>
 
@@ -187,39 +177,38 @@ body {
 
 <script>
 
-/* المخزون */
-let petrol = 2000;
-let diesel1 = 1000;
-let diesel2 = 1000;
+let petrol=2000,diesel1=1000,diesel2=1000;
+let pump=null,input="",type="",price=0;
 
-/* النظام */
-let pump=null,input="",total=0,type="",price=0;
-
+/* تحديث المخزون */
 function updateStock(){
  document.getElementById("petrolStock").innerText=petrol;
  document.getElementById("diesel1Stock").innerText=diesel1;
  document.getElementById("diesel2Stock").innerText=diesel2;
 }
 
-function refill(type){
- let amount=prompt("كم لتر تريد تعبئة؟");
- amount=parseFloat(amount);
- if(isNaN(amount)) return;
-
- if(type==="petrol") petrol+=amount;
- if(type==="diesel1") diesel1+=amount;
- if(type==="diesel2") diesel2+=amount;
-
+/* تعبئة */
+function refill(t){
+ let a=parseFloat(prompt("كم لتر؟"));
+ if(isNaN(a))return;
+ if(t==="petrol")petrol+=a;
+ if(t==="diesel1")diesel1+=a;
+ if(t==="diesel2")diesel2+=a;
  updateStock();
 }
 
+/* اختيار مضخة */
 function selectPump(el,p,t,pr){
  document.querySelectorAll(".pump").forEach(x=>x.classList.remove("active"));
  el.classList.add("active");
 
  pump=p;type=t;price=pr;
+
+ // 🔥 إظهار لوحة الأرقام
+ document.getElementById("keypad").style.display="grid";
 }
 
+/* إدخال */
 function add(n){
  input+=n;
  document.getElementById("display").innerText=input;
@@ -230,43 +219,42 @@ function clearInput(){
  document.getElementById("display").innerText="0";
 }
 
+/* الضخ */
 function startFuel(){
- if(!pump) return alert("اختر مضخة");
+ if(!pump)return alert("اختر مضخة");
 
  let liters=parseFloat(input||0);
 
  if(type==="بنزين"){
-  if(liters>petrol) return alert("المخزون غير كافي");
+  if(liters>petrol)return alert("المخزون غير كافي");
   petrol-=liters;
- }
-
- if(type==="ديزل"){
+ }else{
   if(pump==3){
-    if(liters>diesel1) return alert("المخزون غير كافي");
-    diesel1-=liters;
+   if(liters>diesel1)return alert("المخزون غير كافي");
+   diesel1-=liters;
   }else{
-    if(liters>diesel2) return alert("المخزون غير كافي");
-    diesel2-=liters;
+   if(liters>diesel2)return alert("المخزون غير كافي");
+   diesel2-=liters;
   }
  }
 
  updateStock();
 
- let cost=liters*price;
- total+=cost;
-
- alert("تم الضخ: "+cost.toFixed(2)+" أوقية");
-
  input="";
  document.getElementById("display").innerText="0";
+
+ // 🔥 إخفاء لوحة الأرقام بعد الضخ
+ document.getElementById("keypad").style.display="none";
 }
 
-function showBill(){
- alert("المجموع: "+total.toFixed(2)+" أوقية");
-}
-
+/* إلغاء */
 function cancel(){
- location.reload();
+ pump=null;
+ input="";
+ document.getElementById("display").innerText="0";
+
+ document.getElementById("keypad").style.display="none";
+ document.querySelectorAll(".pump").forEach(x=>x.classList.remove("active"));
 }
 
 updateStock();
