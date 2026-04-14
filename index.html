@@ -9,16 +9,63 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <style>
-body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0;padding:10px}
+body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
+
+/* 🔐 LOGIN */
+#loginBox{
+ position:fixed;
+ top:0;left:0;width:100%;height:100%;
+ background:#000000cc;
+ display:flex;justify-content:center;align-items:center;
+}
+.login-card{
+ background:white;padding:30px;border-radius:20px;width:300px;text-align:center
+}
+.login-card input{
+ width:100%;padding:10px;margin:10px 0;font-size:18px
+}
+.login-card button{
+ width:100%;padding:15px;background:#c9a24b;color:white;border:none;border-radius:10px
+}
+
+/* UI */
+.container{padding:15px}
 .card{background:linear-gradient(135deg,#c9a24b,#a67c2d);color:white;padding:15px;border-radius:15px}
-.display{background:white;padding:15px;font-size:30px;text-align:center;margin:10px 0;border-radius:10px}
-.pumps{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.pump{padding:20px;border-radius:10px;text-align:center}
+
+.stock{
+ background:white;padding:10px;margin-top:10px;border-radius:10px;
+ display:flex;justify-content:space-between;align-items:center
+}
+.stock button{
+ background:#22c55e;color:white;border:none;padding:5px 10px;border-radius:5px
+}
+
+.display{
+ background:white;padding:20px;font-size:30px;text-align:center;margin:10px 0;border-radius:10px
+}
+
+/* 🔥 pumps bigger */
+.pumps{
+ display:grid;
+ grid-template-columns:repeat(2,1fr);
+ gap:15px;
+}
+.pump{
+ padding:40px;
+ font-size:22px;
+ border-radius:20px;
+ text-align:center;
+ font-weight:bold;
+}
 .petrol{background:#22c55e;color:white}
 .diesel{background:#facc15}
+
+/* keypad */
 .keypad{display:none;grid-template-columns:repeat(3,1fr);gap:10px}
-.keypad button{padding:15px}
-.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
+.keypad button{padding:20px;font-size:20px}
+
+/* actions */
+.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
 .btn{padding:15px;border:none;border-radius:10px}
 .green{background:#c9a24b;color:white}
 .red{background:#ef4444;color:white}
@@ -27,26 +74,32 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0;padding:10px}
 
 <body>
 
-<!-- LOGIN -->
+<!-- 🔐 LOGIN -->
 <div id="loginBox">
-<input id="user" placeholder="user">
-<input id="pass" type="password" placeholder="pass">
+<div class="login-card">
+<h2>🔐 تسجيل الدخول</h2>
+<input id="user" placeholder="اسم المستخدم">
+<input id="pass" type="password" placeholder="كلمة المرور">
 <button onclick="login()">دخول</button>
 </div>
+</div>
+
+<div class="container">
 
 <div class="card">⛽ Fuel Pro Cloud</div>
 
-<div>بنزين: <span id="pStock"></span></div>
-<div>مازوت1: <span id="d1Stock"></span></div>
-<div>مازوت2: <span id="d2Stock"></span></div>
+<!-- stock -->
+<div class="stock">⛽ بنزين <span id="pStock"></span> <button onclick="addStock('petrol')">+</button></div>
+<div class="stock">🟡 مازوت1 <span id="d1Stock"></span> <button onclick="addStock('d1')">+</button></div>
+<div class="stock">🟡 مازوت2 <span id="d2Stock"></span> <button onclick="addStock('d2')">+</button></div>
 
 <div class="display" id="display">0</div>
 
 <div class="pumps">
-<div class="pump petrol" onclick="selectPump(1,'بنزين',58.97)">⛽ بنزين1</div>
-<div class="pump petrol" onclick="selectPump(2,'بنزين',58.97)">⛽ بنزين2</div>
-<div class="pump diesel" onclick="selectPump(3,'ديزل',56.35)">⛽ ديزل1</div>
-<div class="pump diesel" onclick="selectPump(4,'ديزل',56.35)">⛽ ديزل2</div>
+<div class="pump petrol" onclick="selectPump(1,'بنزين',58.97)">⛽ بنزين 1</div>
+<div class="pump petrol" onclick="selectPump(2,'بنزين',58.97)">⛽ بنزين 2</div>
+<div class="pump diesel" onclick="selectPump(3,'ديزل',56.35)">⛽ ديزل 1</div>
+<div class="pump diesel" onclick="selectPump(4,'ديزل',56.35)">⛽ ديزل 2</div>
 </div>
 
 <div class="keypad" id="keypad">
@@ -62,17 +115,19 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0;padding:10px}
 <button class="btn red" onclick="cancel()">إلغاء</button>
 </div>
 
+</div>
+
 <script>
 
 /* Firebase */
 const firebaseConfig = {
-  apiKey: "AIzaSyA7pNxijt03_TzDDNnwFbqhyUU-zcbJiq4",
-  authDomain: "pkka7-a75c0.firebaseapp.com",
-  databaseURL: "https://pkka7-a75c0-default-rtdb.firebaseio.com",
-  projectId: "pkka7-a75c0",
-  storageBucket: "pkka7-a75c0.firebasestorage.app",
-  messagingSenderId: "730135985362",
-  appId: "1:730135985362:web:8cf4bfd291e36e936d010b"
+ apiKey: "AIzaSyA7pNxijt03_TzDDNnwFbqhyUU-zcbJiq4",
+ authDomain: "pkka7-a75c0.firebaseapp.com",
+ databaseURL: "https://pkka7-a75c0-default-rtdb.firebaseio.com",
+ projectId: "pkka7-a75c0",
+ storageBucket: "pkka7-a75c0.firebasestorage.app",
+ messagingSenderId: "730135985362",
+ appId: "1:730135985362:web:8cf4bfd291e36e936d010b"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -89,14 +144,14 @@ function login(){
 let petrol=0,d1=0,d2=0,logs=[];
 let pump=null,input="",type="",price=0;
 
-/* init stock */
+/* init */
 db.ref("stock").once("value").then(s=>{
  if(!s.exists()){
   db.ref("stock").set({petrol:2000,d1:1000,d2:1000});
  }
 });
 
-/* load stock */
+/* load */
 db.ref("stock").on("value", s=>{
  let d=s.val();
  if(d){
@@ -109,11 +164,22 @@ db.ref("stock").on("value", s=>{
  }
 });
 
-/* load logs */
 db.ref("logs").on("value", s=>{
  logs=[];
  s.forEach(c=>logs.unshift(c.val()));
 });
+
+/* add stock */
+function addStock(t){
+ let val=parseFloat(prompt("كم تريد إضافة؟"));
+ if(!val)return;
+
+ if(t==="petrol")petrol+=val;
+ if(t==="d1")d1+=val;
+ if(t==="d2")d2+=val;
+
+ db.ref("stock").set({petrol,d1,d2});
+}
 
 /* pumps */
 function selectPump(p,t,pr){
@@ -126,16 +192,13 @@ function clearInput(){input="";display.innerText="0";}
 
 /* start */
 function startFuel(){
-
  let l=parseFloat(input||0);
- if(!l)return alert("ادخل رقم");
+ if(!l)return;
 
- if(type==="بنزين"){
-  if(l>petrol)return alert("لا يوجد مخزون");
-  petrol-=l;
- }else{
-  if(pump==3){if(l>d1)return alert("لا يوجد مخزون"); d1-=l;}
-  else{if(l>d2)return alert("لا يوجد مخزون"); d2-=l;}
+ if(type==="بنزين"){if(l>petrol)return;petrol-=l;}
+ else{
+  if(pump==3){if(l>d1)return;d1-=l;}
+  else{if(l>d2)return;d2-=l;}
  }
 
  db.ref("stock").set({petrol,d1,d2});
@@ -143,26 +206,22 @@ function startFuel(){
  let cost=l*price;
 
  db.ref("logs").push({
-  user:"admin",
-  amount:cost,
-  liters:l,
   type:type,
   pump:pump,
-  time:new Date().toLocaleString()
+  liters:l,
+  amount:cost
  });
 
  input="";
  display.innerText="0";
  keypad.style.display="none";
-
- alert("تمت العملية ✅");
 }
 
 /* log */
 function openLog(){
  let txt="";
  logs.forEach(l=>{
-  txt+=`${l.type} - مضخة ${l.pump} - ${l.liters}L = ${l.amount}\n`;
+  txt+=`${l.type} - ${l.liters}L = ${l.amount}\n`;
  });
  alert(txt||"لا يوجد سجل");
 }
