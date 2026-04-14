@@ -2,22 +2,17 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>Fuel Pro MAX</title>
+<title>Fuel Pro Cloud</title>
 
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<!-- Charts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
-
-/* login */
-#loginBox{
- position:fixed;top:0;left:0;width:100%;height:100%;
- background:#000000aa;display:flex;justify-content:center;align-items:center;
-}
-.login-card{
- background:white;padding:20px;border-radius:15px;width:300px;text-align:center;
-}
-
 .container{padding:15px}
 
 .card{
@@ -27,14 +22,12 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 
 .stock-card{
  background:white;padding:15px;border-radius:15px;margin-top:10px;
- display:flex;justify-content:space-between;align-items:center;font-size:20px;font-weight:bold
-}
-.stock-card button{
- background:#c9a24b;color:white;border:none;border-radius:8px;padding:5px 10px
+ display:flex;justify-content:space-between;font-size:20px;font-weight:bold
 }
 
 .display{
- background:white;color:#c9a24b;padding:20px;border-radius:15px;text-align:center;font-size:30px;margin:10px 0
+ background:white;color:#c9a24b;padding:20px;border-radius:15px;
+ text-align:center;font-size:30px;margin:10px 0
 }
 
 .pumps{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
@@ -50,7 +43,6 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 .green{background:#c9a24b;color:white}
 .red{background:#ef4444;color:white}
 
-/* modal */
 .modal{
  display:none;position:fixed;top:0;left:0;width:100%;height:100%;
  background:#00000088
@@ -59,48 +51,29 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
  background:white;margin:40px auto;padding:20px;border-radius:15px;width:90%
 }
 
-canvas{
- background:white;
- border-radius:15px;
- padding:10px;
- margin-top:10px;
-}
+canvas{background:white;border-radius:15px;margin-top:10px}
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div id="loginBox">
-<div class="login-card">
-<h3>🔐 تسجيل الدخول</h3>
-<input id="user" placeholder="المستخدم"><br><br>
-<input id="pass" type="password" placeholder="كلمة المرور"><br><br>
-<button onclick="login()">دخول</button>
-</div>
-</div>
-
 <div class="container">
 
-<div class="card">⛽ Fuel Pro MAX</div>
+<div class="card">⛽ Fuel Pro Cloud</div>
 
-<!-- STOCK -->
-<div class="stock-card">⛽ البنزين <span id="pStock"></span><button onclick="refill('petrol')">+</button></div>
-<div class="stock-card">🟡 مازوت1 <span id="d1Stock"></span><button onclick="refill('d1')">+</button></div>
-<div class="stock-card">🟡 مازوت2 <span id="d2Stock"></span><button onclick="refill('d2')">+</button></div>
-<div class="stock-card">⚙️ إعادة ضبط <button onclick="resetStock()">🔄</button></div>
+<div class="stock-card">⛽ البنزين <span id="pStock"></span></div>
+<div class="stock-card">🟡 مازوت1 <span id="d1Stock"></span></div>
+<div class="stock-card">🟡 مازوت2 <span id="d2Stock"></span></div>
 
 <div class="display" id="display">0</div>
 
-<!-- PUMPS -->
 <div class="pumps">
-<div class="pump petrol" onclick="selectPump(this,1,'بنزين',58.97)">⛽ بنزين 1</div>
-<div class="pump petrol" onclick="selectPump(this,2,'بنزين',58.97)">⛽ بنزين 2</div>
-<div class="pump diesel" onclick="selectPump(this,3,'ديزل',56.35)">⛽ ديزل 1</div>
-<div class="pump diesel" onclick="selectPump(this,4,'ديزل',56.35)">⛽ ديزل 2</div>
+<div class="pump petrol" onclick="selectPump(1,'بنزين',58.97)">⛽ بنزين 1</div>
+<div class="pump petrol" onclick="selectPump(2,'بنزين',58.97)">⛽ بنزين 2</div>
+<div class="pump diesel" onclick="selectPump(3,'ديزل',56.35)">⛽ ديزل 1</div>
+<div class="pump diesel" onclick="selectPump(4,'ديزل',56.35)">⛽ ديزل 2</div>
 </div>
 
-<!-- KEYPAD -->
 <div class="keypad" id="keypad">
 <button onclick="add(7)">7</button><button onclick="add(8)">8</button><button onclick="add(9)">9</button>
 <button onclick="add(4)">4</button><button onclick="add(5)">5</button><button onclick="add(6)">6</button>
@@ -108,29 +81,18 @@ canvas{
 <button onclick="add(0)">0</button><button onclick="clearInput()">مسح</button>
 </div>
 
-<!-- ACTIONS -->
 <div class="actions">
 <button class="btn green" onclick="startFuel()">ابدأ</button>
-<button class="btn" id="logBtn" onclick="openLog()">📋</button>
-<button class="btn" id="reportBtn" onclick="openReport()">📊</button>
+<button class="btn" onclick="openReport()">📊</button>
 <button class="btn red" onclick="cancel()">إلغاء</button>
 </div>
 
 </div>
 
-<!-- LOG -->
-<div class="modal" id="logModal">
-<div class="modal-box">
-<h3>📋 السجل</h3>
-<div id="logList"></div>
-<button onclick="closeLog()">إغلاق</button>
-</div>
-</div>
-
 <!-- REPORT -->
 <div class="modal" id="reportModal">
 <div class="modal-box">
-<h3>📊 تقرير متقدم</h3>
+<h3>📊 تقرير</h3>
 <div id="reportBox"></div>
 
 <canvas id="barChart" height="200"></canvas>
@@ -143,64 +105,46 @@ canvas{
 
 <script>
 
-let currentUser="";
+/* Firebase */
+const firebaseConfig = {
+  apiKey: "AIzaSyA7pNxijt03_TzDDNnwFbqhyUU-zcbJiq4",
+  authDomain: "pkka7-a75c0.firebaseapp.com",
+  databaseURL: "https://pkka7-a75c0-default-rtdb.firebaseio.com",
+  projectId: "pkka7-a75c0",
+  storageBucket: "pkka7-a75c0.firebasestorage.app",
+  messagingSenderId: "730135985362",
+  appId: "1:730135985362:web:8cf4bfd291e36e936d010b"
+};
 
-/* login */
-function login(){
- let u=user.value,p=pass.value;
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
- if(u==="admin" && p==="1234"){
-  currentUser="admin";
- }else if(u==="cash" && p==="0000"){
-  currentUser="cash";
-  logBtn.style.display="none";
-  reportBtn.style.display="none";
- }else return alert("خطأ");
+/* DATA */
+let petrol=0,d1=0,d2=0,logs=[];
 
- loginBox.style.display="none";
-}
+/* تحميل مباشر */
+db.ref("stock").on("value", s=>{
+ let data=s.val();
+ if(data){
+  petrol=data.petrol;
+  d1=data.d1;
+  d2=data.d2;
 
-/* stock */
-let petrol=parseFloat(localStorage.getItem("petrol"))||2000;
-let d1=parseFloat(localStorage.getItem("d1"))||1000;
-let d2=parseFloat(localStorage.getItem("d2"))||1000;
+  pStock.innerText=petrol;
+  d1Stock.innerText=d1;
+  d2Stock.innerText=d2;
+ }
+});
 
-function saveStock(){
- localStorage.setItem("petrol",petrol);
- localStorage.setItem("d1",d1);
- localStorage.setItem("d2",d2);
-}
-
-function updateStock(){
- pStock.innerText=petrol;
- d1Stock.innerText=d1;
- d2Stock.innerText=d2;
- saveStock();
-}
-
-function refill(t){
- let a=parseFloat(prompt("كم لتر؟"));
- if(isNaN(a))return;
-
- if(t==="petrol")petrol+=a;
- if(t==="d1")d1+=a;
- if(t==="d2")d2+=a;
-
- updateStock();
-}
-
-function resetStock(){
- let pass=prompt("كلمة السر");
- if(pass!=="1234")return alert("خطأ");
-
- petrol=2000;d1=1000;d2=1000;
- updateStock();
-}
+db.ref("logs").on("value", s=>{
+ logs=[];
+ s.forEach(c=>logs.unshift(c.val()));
+});
 
 /* pumps */
 let pump=null,input="",type="",price=0;
 
-function selectPump(el,p,t,pr){
+function selectPump(p,t,pr){
  pump=p;type=t;price=pr;
  keypad.style.display="grid";
 }
@@ -208,58 +152,38 @@ function selectPump(el,p,t,pr){
 function add(n){input+=n;display.innerText=input;}
 function clearInput(){input="";display.innerText="0";}
 
-/* logs */
-let logs=JSON.parse(localStorage.getItem("logs")||"[]");
-
 /* start */
 function startFuel(){
  let l=parseFloat(input||0);
+
  if(type==="بنزين"){if(l>petrol)return;petrol-=l;}
  else{if(pump==3){if(l>d1)return;d1-=l;}else{if(l>d2)return;d2-=l;}}
 
- updateStock();
+ db.ref("stock").set({petrol,d1,d2});
 
  let cost=l*price;
- let log=`${currentUser}|${cost}`;
- logs.unshift(log);
- localStorage.setItem("logs",JSON.stringify(logs));
+ db.ref("logs").push("admin|"+cost);
 
  input="";display.innerText="0";keypad.style.display="none";
 }
 
-/* log */
-function openLog(){
- logList.innerHTML=logs.map(l=>`<p>${l}</p>`).join("");
- logModal.style.display="block";
-}
-function closeLog(){logModal.style.display="none";}
-
-/* charts */
+/* report */
 let barChart,pieChart,lineChart;
 
 function openReport(){
 
- let total=0,admin=0,cash=0;
- let sales=[];
+ let total=0,admin=0,cash=0,sales=[];
 
- logs.forEach((l,i)=>{
-  let parts=l.split("|");
-  let user=parts[0];
-  let val=parseFloat(parts[1]);
+ logs.forEach(l=>{
+  let p=l.split("|");
+  let u=p[0],v=parseFloat(p[1]);
 
-  total+=val;
-  sales.push(val);
-
-  if(user==="admin")admin+=val;
-  if(user==="cash")cash+=val;
+  total+=v;sales.push(v);
+  if(u==="admin")admin+=v;
+  if(u==="cash")cash+=v;
  });
 
- reportBox.innerHTML=`
- العمليات: ${logs.length}<br>
- الإجمالي: ${total.toFixed(2)}<br>
- admin: ${admin.toFixed(2)}<br>
- cash: ${cash.toFixed(2)}
- `;
+ reportBox.innerHTML=`العمليات:${logs.length}<br>الإجمالي:${total}`;
 
  if(barChart)barChart.destroy();
  if(pieChart)pieChart.destroy();
@@ -288,8 +212,6 @@ function closeReport(){reportModal.style.display="none";}
 function cancel(){
  input="";display.innerText="0";keypad.style.display="none";
 }
-
-updateStock();
 
 </script>
 
