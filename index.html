@@ -20,13 +20,17 @@ body {margin:0;font-family:Arial;background:#0a2540;color:white;direction:rtl;}
   border-radius:15px;margin-bottom:10px;color:#00ffcc;
 }
 
-/* الخزانات */
 .tanks {
   background:#0f3b5f;
   padding:10px;
   border-radius:10px;
   margin-bottom:10px;
 }
+
+.btn {padding:8px;margin:5px;border:none;border-radius:8px;color:white;cursor:pointer;}
+.green{background:#22c55e;}
+.gray{background:#3b82f6;}
+.red{background:#ef4444;}
 
 .pumps {
   display:grid;
@@ -61,10 +65,6 @@ body {margin:0;font-family:Arial;background:#0a2540;color:white;direction:rtl;}
 }
 
 .right {width:30%;padding:10px;}
-.btn {width:100%;padding:15px;margin:5px;border:none;border-radius:10px;color:white;}
-.green{background:#22c55e;}
-.red{background:#ef4444;}
-
 </style>
 </head>
 
@@ -86,8 +86,13 @@ body {margin:0;font-family:Arial;background:#0a2540;color:white;direction:rtl;}
 <!-- 🔥 الخزانات -->
 <div class="tanks">
 <p id="tankPetrol">خزان البنزين: 2000 لتر</p>
+<button onclick="refill('petrol')" class="btn green">+ تعبئة البنزين</button>
+
 <p id="tankDiesel1">مازوت خزان 1: 1000 لتر</p>
+<button onclick="refill('diesel1')" class="btn gray">+ تعبئة مازوت 1</button>
+
 <p id="tankDiesel2">مازوت خزان 2: 1000 لتر</p>
+<button onclick="refill('diesel2')" class="btn gray">+ تعبئة مازوت 2</button>
 </div>
 
 <div class="display" id="display">0</div>
@@ -159,35 +164,61 @@ function clearInput(){
  document.getElementById("display").innerText="0";
 }
 
+// 🔥 التعبئة
+function refill(type){
+ let amount=prompt("كم لتر تريد إضافته؟");
+ amount=parseFloat(amount);
+
+ if(isNaN(amount)||amount<=0)return alert("كمية غير صحيحة");
+
+ if(type==="petrol")petrolTank+=amount;
+ if(type==="diesel1")diesel1+=amount;
+ if(type==="diesel2")diesel2+=amount;
+
+ updateUI();
+ alert("تمت التعبئة");
+}
+
+// تحديث العرض
+function updateUI(){
+ document.getElementById("tankPetrol").innerText="خزان البنزين: "+petrolTank.toFixed(2);
+ document.getElementById("tankDiesel1").innerText="مازوت خزان 1: "+diesel1.toFixed(2);
+ document.getElementById("tankDiesel2").innerText="مازوت خزان 2: "+diesel2.toFixed(2);
+}
+
+// التشغيل
 function startFuel(){
  if(!pump)return alert("اختر مضخة");
 
  let liters=parseFloat(input||0);
 
  if(type==="بنزين"){
-  if(liters>petrolTank)return alert("لا يوجد بنزين كافي");
+  if(liters>petrolTank)return alert("بنزين قليل");
   petrolTank-=liters;
  }
 
  if(type==="ديزل1"){
-  if(liters>diesel1)return alert("الخزان 1 فارغ");
+  if(liters>diesel1)return alert("مازوت 1 قليل");
   diesel1-=liters;
  }
 
  if(type==="ديزل2"){
-  if(liters>diesel2)return alert("الخزان 2 فارغ");
+  if(liters>diesel2)return alert("مازوت 2 قليل");
   diesel2-=liters;
  }
 
- document.getElementById("tankPetrol").innerText="خزان البنزين: "+petrolTank;
- document.getElementById("tankDiesel1").innerText="مازوت خزان 1: "+diesel1;
- document.getElementById("tankDiesel2").innerText="مازوت خزان 2: "+diesel2;
+ // 🔔 تنبيه إذا قليل
+ if(petrolTank<100)alert("⚠️ البنزين قرب ينفذ");
+ if(diesel1<100)alert("⚠️ مازوت 1 قرب ينفذ");
+ if(diesel2<100)alert("⚠️ مازوت 2 قرب ينفذ");
+
+ updateUI();
 
  let cost=liters*price;
  total+=cost;
 
  document.getElementById("bill").innerHTML+=
- `<p>${type} - ${liters}L = ${cost.toFixed(2)}</p>`;
+ `<p>${type} - ${liters} لتر = ${cost.toFixed(2)}</p>`;
 
  document.getElementById("total").innerText="المجموع: "+total;
 
