@@ -53,7 +53,6 @@ body {
   padding:10px;
 }
 
-/* شاشة */
 .display {
   background:#000;
   padding:20px;
@@ -61,7 +60,6 @@ body {
   text-align:center;
   border-radius:15px;
   margin-bottom:15px;
-  letter-spacing:2px;
 }
 
 /* مضخات */
@@ -78,20 +76,14 @@ body {
   border-radius:20px;
   cursor:pointer;
   transition:0.3s;
-  box-shadow:0 5px 15px rgba(0,0,0,0.3);
-}
-
-.pump:hover {
-  transform:translateY(-5px);
-}
-
-.pump img {
-  width:70px;
-  margin-bottom:10px;
 }
 
 .pump.active {
   background:#22c55e;
+}
+
+.pump img {
+  width:70px;
 }
 
 /* KEYPAD */
@@ -110,12 +102,10 @@ body {
   background:#2563eb;
   color:white;
   font-weight:bold;
-  transition:0.2s;
 }
 
 .keypad button:active {
   transform:scale(0.9);
-  background:#1d4ed8;
 }
 
 /* RIGHT */
@@ -132,11 +122,6 @@ body {
   border-radius:12px;
   font-size:18px;
   font-weight:bold;
-  transition:0.2s;
-}
-
-.btn:active {
-  transform:scale(0.95);
 }
 
 .green {background:#16a34a;}
@@ -147,11 +132,6 @@ body {
 </head>
 
 <body>
-
-<!-- 🔊 صوت جديد يعمل -->
-<audio id="clickSound" preload="auto">
-  <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=click-124467.mp3" type="audio/mpeg">
-</audio>
 
 <div class="container">
 
@@ -222,6 +202,29 @@ body {
 
 <script>
 
+// 🎧 نظام صوت احترافي
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function beep(freq, time, volume){
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  osc.frequency.value = freq;
+  gain.gain.value = volume;
+
+  osc.start();
+  osc.stop(audioCtx.currentTime + time);
+}
+
+// أصوات
+function clickSound(){ beep(800, 0.05, 0.1); }
+function successSound(){ beep(1200, 0.1, 0.2); }
+function errorSound(){ beep(200, 0.2, 0.2); }
+
+// النظام
 let pump = null;
 let input = "";
 let total = 0;
@@ -240,12 +243,7 @@ function selectPump(el, p, type, price){
 function add(n){
   input += n;
   document.getElementById("display").innerText = input;
-
-  let sound = document.getElementById("clickSound");
-  sound.volume = 1;
-  sound.pause();
-  sound.currentTime = 0;
-  sound.play().catch(()=>{});
+  clickSound(); // 🔊 صوت الأرقام
 }
 
 function clearInput(){
@@ -254,11 +252,16 @@ function clearInput(){
 }
 
 function startFuel(){
-  if(!pump) return alert("اختر مضخة");
+  if(!pump){
+    errorSound(); // ⚠️ خطأ
+    return alert("اختر مضخة");
+  }
 
   let liters = parseFloat(input || 0);
   let cost = liters * pricePerLiter;
   total += cost;
+
+  successSound(); // ✅ نجاح
 
   document.getElementById("bill").innerHTML +=
     `<p>${fuelType} - مضخة ${pump} - ${liters} لتر = ${cost.toFixed(2)} أوقية</p>`;
@@ -271,11 +274,13 @@ function startFuel(){
 }
 
 function pay(){
+  successSound();
   alert("تم الدفع: " + total.toFixed(2) + " أوقية");
   location.reload();
 }
 
 function cancel(){
+  errorSound();
   location.reload();
 }
 
