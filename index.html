@@ -7,6 +7,15 @@
 <style>
 body {font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 
+/* login */
+#loginBox{
+ position:fixed;top:0;left:0;width:100%;height:100%;
+ background:#000000aa;display:flex;justify-content:center;align-items:center;
+}
+.login-card{
+ background:white;padding:20px;border-radius:15px;width:300px;text-align:center;
+}
+
 .container{padding:15px}
 
 .card{
@@ -41,20 +50,38 @@ body {font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 .diesel{background:#facc15}
 .pump span{font-size:40px;display:block}
 
-/* لوحة الأرقام */
+/* keypad */
 .keypad{display:none;grid-template-columns:repeat(3,1fr);gap:10px}
 .keypad button{padding:20px;font-size:20px}
 
-/* الأزرار */
+/* buttons */
 .actions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
 .btn{padding:15px;border:none;border-radius:10px}
 .green{background:#c9a24b;color:white}
 .red{background:#ef4444;color:white}
 
+/* modal */
+.modal{
+ display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+ background:#00000088
+}
+.modal-box{
+ background:white;margin:40px auto;padding:20px;border-radius:15px;width:90%
+}
 </style>
 </head>
 
 <body>
+
+<!-- LOGIN -->
+<div id="loginBox">
+<div class="login-card">
+<h3>🔐 تسجيل الدخول</h3>
+<input id="user" placeholder="المستخدم"><br><br>
+<input id="pass" type="password" placeholder="كلمة المرور"><br><br>
+<button onclick="login()">دخول</button>
+</div>
+</div>
 
 <div class="container">
 
@@ -76,15 +103,14 @@ body {font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 <button onclick="refill('d2')">+</button>
 </div>
 
-<!-- 🔐 زر إعادة ضبط -->
 <div class="stock-card">
-⚙️ إعادة ضبط المخزون
+⚙️ إعادة ضبط
 <button onclick="resetStock()">🔄</button>
 </div>
 
 <div class="display" id="display">0</div>
 
-<!-- المضخات -->
+<!-- pumps -->
 <div class="pumps">
 <div class="pump petrol" onclick="selectPump(this,1,'بنزين',58.97)"><span>⛽</span>بنزين 1</div>
 <div class="pump petrol" onclick="selectPump(this,2,'بنزين',58.97)"><span>⛽</span>بنزين 2</div>
@@ -92,7 +118,7 @@ body {font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 <div class="pump diesel" onclick="selectPump(this,4,'ديزل',56.35)"><span>⛽</span>ديزل 2</div>
 </div>
 
-<!-- لوحة الأرقام -->
+<!-- keypad -->
 <div class="keypad" id="keypad">
 <button onclick="add(7)">7</button>
 <button onclick="add(8)">8</button>
@@ -107,31 +133,59 @@ body {font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 <button onclick="clearInput()">مسح</button>
 </div>
 
-<!-- الأزرار -->
+<!-- buttons -->
 <div class="actions">
 <button class="btn green" onclick="startFuel()">ابدأ</button>
+<button class="btn" id="logBtn" onclick="openLog()">📋 السجل</button>
 <button class="btn red" onclick="cancel()">إلغاء</button>
 </div>
 
 </div>
 
+<!-- LOG -->
+<div class="modal" id="logModal">
+<div class="modal-box">
+<h3>📋 سجل العمليات</h3>
+<div id="logList"></div>
+<button onclick="clearLog()">🗑 حذف</button>
+<button onclick="closeLog()">إغلاق</button>
+</div>
+</div>
+
 <script>
 
-/* 🔥 تحميل المخزون */
-let petrol = parseFloat(localStorage.getItem("petrol")) || 2000;
-let d1 = parseFloat(localStorage.getItem("d1")) || 1000;
-let d2 = parseFloat(localStorage.getItem("d2")) || 1000;
+/* المستخدم */
+let currentUser="";
 
-let pump=null,input="",type="",price=0;
+/* login */
+function login(){
+ let u=user.value,p=pass.value;
+
+ if(u==="admin" && p==="1234"){
+  currentUser="admin";
+ }else if(u==="cash" && p==="0000"){
+  currentUser="cash";
+  logBtn.style.display="none";
+ }else return alert("خطأ");
+
+ loginBox.style.display="none";
+}
+
+/* 🔥 تحميل المخزون */
+let petrol=parseFloat(localStorage.getItem("petrol"))||2000;
+let d1=parseFloat(localStorage.getItem("d1"))||1000;
+let d2=parseFloat(localStorage.getItem("d2"))||1000;
+
+/* 🔥 تحميل السجل */
+let logs=JSON.parse(localStorage.getItem("logs")||"[]");
 
 /* حفظ */
 function saveStock(){
- localStorage.setItem("petrol", petrol);
- localStorage.setItem("d1", d1);
- localStorage.setItem("d2", d2);
+ localStorage.setItem("petrol",petrol);
+ localStorage.setItem("d1",d1);
+ localStorage.setItem("d2",d2);
 }
 
-/* تحديث */
 function updateStock(){
  pStock.innerText=petrol;
  d1Stock.innerText=d1;
@@ -151,20 +205,18 @@ function refill(t){
  updateStock();
 }
 
-/* 🔐 إعادة ضبط */
+/* reset */
 function resetStock(){
- let pass=prompt("ادخل كلمة السر");
- if(pass!=="1234") return alert("خطأ");
+ let pass=prompt("كلمة السر");
+ if(pass!=="1234")return alert("خطأ");
 
- petrol=2000;
- d1=1000;
- d2=1000;
-
+ petrol=2000;d1=1000;d2=1000;
  updateStock();
- alert("تم إعادة الضبط");
 }
 
-/* اختيار مضخة */
+/* pumps */
+let pump=null,input="",type="",price=0;
+
 function selectPump(el,p,t,pr){
  document.querySelectorAll(".pump").forEach(x=>x.style.outline="none");
  el.style.outline="3px solid black";
@@ -173,11 +225,10 @@ function selectPump(el,p,t,pr){
  keypad.style.display="grid";
 }
 
-/* إدخال */
 function add(n){input+=n;display.innerText=input;}
 function clearInput(){input="";display.innerText="0";}
 
-/* ضخ */
+/* start */
 function startFuel(){
  if(!pump)return alert("اختر مضخة");
 
@@ -198,16 +249,42 @@ function startFuel(){
 
  updateStock();
 
- input="";
- display.innerText="0";
- keypad.style.display="none";
+ let cost=l*price;
+ let time=new Date().toLocaleString("ar");
+
+ let log=`👤 ${currentUser}
+🕒 ${time}
+⛽ ${type}
+🔢 مضخة ${pump}
+📦 ${l} لتر
+💰 ${cost.toFixed(2)} أوقية`;
+
+ logs.unshift(log);
+ localStorage.setItem("logs",JSON.stringify(logs));
+
+ input="";display.innerText="0";keypad.style.display="none";
 }
 
-/* إلغاء */
 function cancel(){
- input="";
- display.innerText="0";
- keypad.style.display="none";
+ input="";display.innerText="0";keypad.style.display="none";
+}
+
+/* log */
+function openLog(){
+ let box=logList;box.innerHTML="";
+ if(logs.length===0){box.innerHTML="<p>لا يوجد</p>";}
+ else{
+  logs.forEach(l=>{
+   box.innerHTML+=`<div style="background:#f1f5f9;padding:10px;margin:5px;border-radius:10px">${l.replace(/\n/g,"<br>")}</div>`;
+  });
+ }
+ logModal.style.display="block";
+}
+
+function closeLog(){logModal.style.display="none";}
+
+function clearLog(){
+ logs=[];localStorage.removeItem("logs");openLog();
 }
 
 updateStock();
