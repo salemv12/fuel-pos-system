@@ -53,15 +53,18 @@ body {
   padding:10px;
 }
 
+/* شاشة */
 .display {
   background:#000;
-  padding:15px;
-  font-size:28px;
+  padding:20px;
+  font-size:32px;
   text-align:center;
-  border-radius:10px;
-  margin-bottom:10px;
+  border-radius:15px;
+  margin-bottom:15px;
+  letter-spacing:2px;
 }
 
+/* مضخات */
 .pumps {
   display:grid;
   grid-template-columns: repeat(2,1fr);
@@ -70,10 +73,16 @@ body {
 
 .pump {
   background:#1e5f8a;
-  padding:15px;
+  padding:20px;
   text-align:center;
-  border-radius:15px;
+  border-radius:20px;
   cursor:pointer;
+  transition:0.3s;
+  box-shadow:0 5px 15px rgba(0,0,0,0.3);
+}
+
+.pump:hover {
+  transform:translateY(-5px);
 }
 
 .pump img {
@@ -95,11 +104,18 @@ body {
 
 .keypad button {
   padding:20px;
-  font-size:18px;
+  font-size:20px;
   border:none;
-  border-radius:10px;
+  border-radius:12px;
   background:#2563eb;
   color:white;
+  font-weight:bold;
+  transition:0.2s;
+}
+
+.keypad button:active {
+  transform:scale(0.9);
+  background:#1d4ed8;
 }
 
 /* RIGHT */
@@ -111,10 +127,16 @@ body {
 .btn {
   width:100%;
   padding:15px;
-  margin:5px 0;
+  margin:8px 0;
   border:none;
-  border-radius:10px;
+  border-radius:12px;
   font-size:18px;
+  font-weight:bold;
+  transition:0.2s;
+}
+
+.btn:active {
+  transform:scale(0.95);
 }
 
 .green {background:#16a34a;}
@@ -126,8 +148,10 @@ body {
 
 <body>
 
-<!-- 🔊 صوت الضغط -->
-<audio id="clickSound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
+<!-- 🔊 صوت -->
+<audio id="clickSound" preload="auto">
+  <source src="https://www.soundjay.com/buttons/sounds/button-16.mp3" type="audio/mpeg">
+</audio>
 
 <div class="container">
 
@@ -218,8 +242,9 @@ function add(n){
   document.getElementById("display").innerText = input;
 
   let sound = document.getElementById("clickSound");
+  sound.pause();
   sound.currentTime = 0;
-  sound.play();
+  sound.play().catch(()=>{});
 }
 
 function clearInput(){
