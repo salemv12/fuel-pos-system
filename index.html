@@ -5,85 +5,37 @@
 <title>نظام محطة الوقود</title>
 
 <style>
+
 body {
   margin:0;
   font-family: Arial;
-  background:#0a2540;
-  color:white;
+  background:#f1f5f9;
+  color:#1e293b;
   direction: rtl;
 }
 
-.container {display:flex;height:100vh;}
-.center {width:100%;padding:15px;}
+.container {
+  padding:15px;
+}
 
-/* زر موحد */
-.uniform-btn {
-  width:100%;
-  height:70px;
-  font-size:18px;
-  border-radius:12px;
-  font-weight:bold;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  border:none;
-  cursor:pointer;
+/* بطاقة مثل البنك */
+.card {
+  background: linear-gradient(135deg,#c9a24b,#a67c2d);
   color:white;
-  box-shadow:0 4px 10px rgba(0,0,0,0.3);
-}
-
-.uniform-btn:active {transform:scale(0.95);}
-
-/* ألوان */
-.green{background:#22c55e;}
-.gray{background:#3b82f6;}
-.red{background:#ef4444;}
-.blue{background:#2563eb;}
-
-.petrol {background:#16a34a;}
-.diesel {background:#eab308;color:black;}
-
-/* المؤشر */
-.indicator {
-  width:10px;
-  height:10px;
-  border-radius:50%;
-  margin-top:5px;
-}
-.indicator.green {background:#22c55e;}
-.indicator.yellow {background:#eab308;}
-
-/* أيقونة */
-.pump-icon {font-size:28px;}
-
-/* تأثير الضخ */
-.pumping {
-  animation: pumpGlow 1s infinite alternate;
-}
-
-@keyframes pumpGlow {
-  from {transform:scale(1);box-shadow:0 0 10px rgba(255,255,255,0.2);}
-  to {transform:scale(1.05);box-shadow:0 0 25px rgba(255,255,255,0.9);}
-}
-
-/* الخزانات */
-.tanks {
-  background:#0f3b5f;
-  padding:10px;
-  border-radius:10px;
-  margin-bottom:10px;
+  border-radius:20px;
+  padding:20px;
+  margin-bottom:15px;
 }
 
 /* الشاشة */
 .display {
-  background:#000;
-  padding:20px;
-  font-size:36px;
-  text-align:center;
+  background:white;
+  color:#c9a24b;
   border-radius:15px;
-  margin-bottom:10px;
-  color:#00ffcc;
+  padding:20px;
+  text-align:center;
+  font-size:32px;
+  margin-bottom:15px;
 }
 
 /* المضخات */
@@ -93,23 +45,70 @@ body {
   gap:10px;
 }
 
+.pump {
+  background:white;
+  border-radius:15px;
+  padding:20px;
+  text-align:center;
+  font-size:18px;
+  border:1px solid #e2e8f0;
+  cursor:pointer;
+}
+
+.pump.active {
+  border:2px solid #c9a24b;
+}
+
 /* الأرقام */
 .keypad {
-  margin-top:10px;
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:10px;
+  margin-top:15px;
+}
+
+.keypad button {
+  padding:20px;
+  font-size:20px;
+  background:white;
+  border:none;
+  border-radius:12px;
+  border:1px solid #e2e8f0;
+  cursor:pointer;
 }
 
 /* الأزرار */
 .actions {
-  margin-top:15px;
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:10px;
+  margin-top:15px;
 }
 
-/* نافذة السجل */
+.btn {
+  padding:15px;
+  border:none;
+  border-radius:12px;
+  font-size:18px;
+  cursor:pointer;
+}
+
+.green {
+  background:#c9a24b;
+  color:white;
+}
+
+.red {
+  background:#ef4444;
+  color:white;
+}
+
+.gray {
+  background:white;
+  border:1px solid #e2e8f0;
+}
+
+/* السجل */
 #billModal {
   position:fixed;
   top:50%;
@@ -117,128 +116,97 @@ body {
   transform:translate(-50%,-50%);
   width:85%;
   height:70%;
-  background:#0f3b5f;
+  background:white;
   border-radius:15px;
   padding:15px;
   display:none;
   flex-direction:column;
 }
+
 </style>
 </head>
 
 <body>
 
 <div class="container">
-<div class="center">
 
-<!-- الخزانات -->
-<div class="tanks">
-<p id="tankPetrol">خزان البنزين: 2000 لتر</p>
-<button class="uniform-btn green" onclick="refill('petrol')">+ تعبئة البنزين</button>
-
-<p id="tankDiesel1">مازوت خزان 1: 1000 لتر</p>
-<button class="uniform-btn gray" onclick="refill('diesel1')">+ تعبئة مازوت 1</button>
-
-<p id="tankDiesel2">مازوت خزان 2: 1000 لتر</p>
-<button class="uniform-btn gray" onclick="refill('diesel2')">+ تعبئة مازوت 2</button>
+<!-- بطاقة -->
+<div class="card">
+<h2>⛽ محطة الوقود</h2>
+<p>نظام إدارة متكامل</p>
 </div>
 
-<!-- الشاشة -->
+<!-- شاشة -->
 <div class="display" id="display">0</div>
 
 <!-- المضخات -->
 <div class="pumps">
 
-<div class="uniform-btn petrol pump-box" onclick="selectPump(this,1,'بنزين',58.97)">
-  <span class="pump-icon">⛽</span>
-  <span>بنزين 1</span>
-  <span class="indicator green"></span>
+<div class="pump" onclick="selectPump(this,1,'بنزين',58.97)">
+⛽<br>بنزين 1
 </div>
 
-<div class="uniform-btn petrol pump-box" onclick="selectPump(this,2,'بنزين',58.97)">
-  <span class="pump-icon">⛽</span>
-  <span>بنزين 2</span>
-  <span class="indicator green"></span>
+<div class="pump" onclick="selectPump(this,2,'بنزين',58.97)">
+⛽<br>بنزين 2
 </div>
 
-<div class="uniform-btn diesel pump-box" onclick="selectPump(this,3,'ديزل1',56.35)">
-  <span class="pump-icon">⛽</span>
-  <span>ديزل 1</span>
-  <span class="indicator yellow"></span>
+<div class="pump" onclick="selectPump(this,3,'ديزل',56.35)">
+⛽<br>ديزل 1
 </div>
 
-<div class="uniform-btn diesel pump-box" onclick="selectPump(this,4,'ديزل2',56.35)">
-  <span class="pump-icon">⛽</span>
-  <span>ديزل 2</span>
-  <span class="indicator yellow"></span>
+<div class="pump" onclick="selectPump(this,4,'ديزل',56.35)">
+⛽<br>ديزل 2
 </div>
 
 </div>
 
 <!-- لوحة الأرقام -->
 <div class="keypad">
-<button class="uniform-btn blue" onclick="add(7)">7</button>
-<button class="uniform-btn blue" onclick="add(8)">8</button>
-<button class="uniform-btn blue" onclick="add(9)">9</button>
-<button class="uniform-btn blue" onclick="add(4)">4</button>
-<button class="uniform-btn blue" onclick="add(5)">5</button>
-<button class="uniform-btn blue" onclick="add(6)">6</button>
-<button class="uniform-btn blue" onclick="add(1)">1</button>
-<button class="uniform-btn blue" onclick="add(2)">2</button>
-<button class="uniform-btn blue" onclick="add(3)">3</button>
-<button class="uniform-btn blue" onclick="add(0)">0</button>
-<button class="uniform-btn red" onclick="clearInput()">مسح</button>
+<button onclick="add(7)">7</button>
+<button onclick="add(8)">8</button>
+<button onclick="add(9)">9</button>
+<button onclick="add(4)">4</button>
+<button onclick="add(5)">5</button>
+<button onclick="add(6)">6</button>
+<button onclick="add(1)">1</button>
+<button onclick="add(2)">2</button>
+<button onclick="add(3)">3</button>
+<button onclick="add(0)">0</button>
+<button onclick="clearInput()">مسح</button>
 </div>
 
 <!-- الأزرار -->
 <div class="actions">
-<button class="uniform-btn green" onclick="startFuel()">ابدأ</button>
-<button class="uniform-btn gray" onclick="toggleBill()">📋 السجل</button>
-<button class="uniform-btn red" onclick="cancel()">إلغاء</button>
+<button class="btn green" onclick="startFuel()">ابدأ</button>
+<button class="btn gray" onclick="toggleBill()">📋 السجل</button>
+<button class="btn red" onclick="cancel()">إلغاء</button>
 </div>
 
-</div>
 </div>
 
 <!-- السجل -->
 <div id="billModal">
 <h3>السجل</h3>
 
-<div id="bill" style="flex:1;overflow:auto;background:#0a2540;padding:10px;border-radius:10px;"></div>
+<div id="bill" style="flex:1;overflow:auto;background:#f1f5f9;padding:10px;border-radius:10px;"></div>
 <div id="total">المجموع: 0 أوقية</div>
 
-<button onclick="toggleBill()" class="uniform-btn red">إغلاق</button>
+<button onclick="toggleBill()" class="btn red">إغلاق</button>
 </div>
 
 <script>
 
-// صوت
-const ctx=new (window.AudioContext||window.webkitAudioContext)();
-function beep(){
- let o=ctx.createOscillator(),g=ctx.createGain();
- o.connect(g);g.connect(ctx.destination);
- o.frequency.value=800;g.gain.value=0.1;
- o.start();o.stop(ctx.currentTime+0.05);
-}
-
-// خزانات
-let petrolTank=2000;
-let diesel1=1000;
-let diesel2=1000;
-
-// النظام
 let pump=null,input="",total=0,type="",price=0;
 
 function selectPump(el,p,t,pr){
- document.querySelectorAll(".pump-box").forEach(x=>x.style.outline="none");
- el.style.outline="3px solid white";
+ document.querySelectorAll(".pump").forEach(x=>x.classList.remove("active"));
+ el.classList.add("active");
  pump=p;type=t;price=pr;
 }
 
 function add(n){
  input+=n;
  document.getElementById("display").innerText=input;
- beep();
 }
 
 function clearInput(){
@@ -246,47 +214,18 @@ function clearInput(){
  document.getElementById("display").innerText="0";
 }
 
-function refill(type){
- let amount=prompt("كم لتر تريد إضافته؟");
- amount=parseFloat(amount);
- if(isNaN(amount)) return;
-
- if(type==="petrol")petrolTank+=amount;
- if(type==="diesel1")diesel1+=amount;
- if(type==="diesel2")diesel2+=amount;
-
- updateUI();
-}
-
-function updateUI(){
- document.getElementById("tankPetrol").innerText="خزان البنزين: "+petrolTank.toFixed(2);
- document.getElementById("tankDiesel1").innerText="مازوت خزان 1: "+diesel1.toFixed(2);
- document.getElementById("tankDiesel2").innerText="مازوت خزان 2: "+diesel2.toFixed(2);
-}
-
 function startFuel(){
  if(!pump)return alert("اختر مضخة");
 
  let liters=parseFloat(input||0);
-
- if(type==="بنزين"){ if(liters>petrolTank)return alert("بنزين قليل"); petrolTank-=liters; }
- if(type==="ديزل1"){ if(liters>diesel1)return alert("مازوت قليل"); diesel1-=liters; }
- if(type==="ديزل2"){ if(liters>diesel2)return alert("مازوت قليل"); diesel2-=liters; }
-
- updateUI();
-
  let cost=liters*price;
  total+=cost;
-
- let activePump=document.querySelectorAll(".pump-box")[pump-1];
- activePump.classList.add("pumping");
-
- setTimeout(()=>{activePump.classList.remove("pumping");},2000);
 
  document.getElementById("bill").innerHTML+=
  `<p>${type} - ${liters} لتر = ${cost.toFixed(2)} أوقية</p>`;
 
- document.getElementById("total").innerText="المجموع: "+total.toFixed(2)+" أوقية";
+ document.getElementById("total").innerText=
+ "المجموع: "+total.toFixed(2)+" أوقية";
 
  input="";
  document.getElementById("display").innerText="0";
@@ -294,7 +233,7 @@ function startFuel(){
 
 function toggleBill(){
  let modal=document.getElementById("billModal");
- modal.style.display = modal.style.display==="flex" ? "none" : "flex";
+ modal.style.display=modal.style.display==="flex"?"none":"flex";
 }
 
 function cancel(){
