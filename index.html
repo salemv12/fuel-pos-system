@@ -5,7 +5,14 @@
 <title>نظام محطة الوقود</title>
 
 <style>
-body {margin:0;font-family:Arial;background:#0a2540;color:white;direction:rtl;}
+body {
+  margin:0;
+  font-family: Arial;
+  background:#0a2540;
+  color:white;
+  direction: rtl;
+}
+
 .container {display:flex;height:100vh;}
 
 .left {width:30%;background:#133b5c;padding:10px;}
@@ -16,8 +23,13 @@ body {margin:0;font-family:Arial;background:#0a2540;color:white;direction:rtl;}
 .center {width:40%;padding:10px;}
 
 .display {
-  background:#000;padding:20px;font-size:36px;text-align:center;
-  border-radius:15px;margin-bottom:10px;color:#00ffcc;
+  background:#000;
+  padding:20px;
+  font-size:36px;
+  text-align:center;
+  border-radius:15px;
+  margin-bottom:10px;
+  color:#00ffcc;
 }
 
 .tanks {
@@ -27,7 +39,15 @@ body {margin:0;font-family:Arial;background:#0a2540;color:white;direction:rtl;}
   margin-bottom:10px;
 }
 
-.btn {padding:8px;margin:5px;border:none;border-radius:8px;color:white;cursor:pointer;}
+.btn {
+  padding:10px;
+  margin:5px;
+  border:none;
+  border-radius:10px;
+  color:white;
+  cursor:pointer;
+}
+
 .green{background:#22c55e;}
 .gray{background:#3b82f6;}
 .red{background:#ef4444;}
@@ -64,7 +84,24 @@ body {margin:0;font-family:Arial;background:#0a2540;color:white;direction:rtl;}
   color:white;
 }
 
-.right {width:30%;padding:10px;}
+/* 🔥 أزرار التحكم الجديدة */
+.actions {
+  margin-top:15px;
+  display:flex;
+  gap:10px;
+}
+
+.big {
+  flex:1;
+  padding:25px;
+  font-size:22px;
+  border-radius:15px;
+  font-weight:bold;
+}
+
+.big:active {
+  transform:scale(0.95);
+}
 </style>
 </head>
 
@@ -83,7 +120,6 @@ body {margin:0;font-family:Arial;background:#0a2540;color:white;direction:rtl;}
 <!-- CENTER -->
 <div class="center">
 
-<!-- 🔥 الخزانات -->
 <div class="tanks">
 <p id="tankPetrol">خزان البنزين: 2000 لتر</p>
 <button onclick="refill('petrol')" class="btn green">+ تعبئة البنزين</button>
@@ -118,19 +154,19 @@ body {margin:0;font-family:Arial;background:#0a2540;color:white;direction:rtl;}
 <button onclick="clearInput()">مسح</button>
 </div>
 
+<!-- 🔥 الأزرار الكبيرة تحت -->
+<div class="actions">
+  <button class="btn big green" onclick="startFuel()">ابدأ</button>
+  <button class="btn big red" onclick="cancel()">إلغاء</button>
 </div>
 
-<!-- RIGHT -->
-<div class="right">
-<button class="btn green" onclick="startFuel()">ابدأ</button>
-<button class="btn red" onclick="cancel()">إلغاء</button>
 </div>
 
 </div>
 
 <script>
 
-// 🔊 صوت
+// الصوت
 const ctx=new (window.AudioContext||window.webkitAudioContext)();
 function beep(f,t,v){
  let o=ctx.createOscillator(),g=ctx.createGain();
@@ -164,11 +200,10 @@ function clearInput(){
  document.getElementById("display").innerText="0";
 }
 
-// 🔥 التعبئة
+// التعبئة
 function refill(type){
  let amount=prompt("كم لتر تريد إضافته؟");
  amount=parseFloat(amount);
-
  if(isNaN(amount)||amount<=0)return alert("كمية غير صحيحة");
 
  if(type==="petrol")petrolTank+=amount;
@@ -176,10 +211,9 @@ function refill(type){
  if(type==="diesel2")diesel2+=amount;
 
  updateUI();
- alert("تمت التعبئة");
 }
 
-// تحديث العرض
+// تحديث
 function updateUI(){
  document.getElementById("tankPetrol").innerText="خزان البنزين: "+petrolTank.toFixed(2);
  document.getElementById("tankDiesel1").innerText="مازوت خزان 1: "+diesel1.toFixed(2);
@@ -198,19 +232,14 @@ function startFuel(){
  }
 
  if(type==="ديزل1"){
-  if(liters>diesel1)return alert("مازوت 1 قليل");
+  if(liters>diesel1)return alert("مازوت قليل");
   diesel1-=liters;
  }
 
  if(type==="ديزل2"){
-  if(liters>diesel2)return alert("مازوت 2 قليل");
+  if(liters>diesel2)return alert("مازوت قليل");
   diesel2-=liters;
  }
-
- // 🔔 تنبيه إذا قليل
- if(petrolTank<100)alert("⚠️ البنزين قرب ينفذ");
- if(diesel1<100)alert("⚠️ مازوت 1 قرب ينفذ");
- if(diesel2<100)alert("⚠️ مازوت 2 قرب ينفذ");
 
  updateUI();
 
