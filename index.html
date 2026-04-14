@@ -24,6 +24,7 @@ body {
   border-radius:12px;
   font-weight:bold;
   display:flex;
+  flex-direction:column;
   align-items:center;
   justify-content:center;
   border:none;
@@ -36,12 +37,14 @@ body {
   transform:scale(0.95);
 }
 
-/* الألوان */
+/* ألوان */
 .green{background:#22c55e;}
 .gray{background:#3b82f6;}
 .red{background:#ef4444;}
 .blue{background:#2563eb;}
-.pumpColor{background:#1e5f8a;}
+
+.petrol {background:#16a34a;}
+.diesel {background:#eab308;color:black;}
 
 /* الخزانات */
 .tanks {
@@ -69,6 +72,10 @@ body {
   gap:10px;
 }
 
+.pump-box img {
+  width:45px;
+}
+
 /* الأرقام */
 .keypad {
   margin-top:10px;
@@ -77,7 +84,7 @@ body {
   gap:10px;
 }
 
-/* الأزرار السفلية */
+/* أزرار التحكم */
 .actions {
   margin-top:15px;
   display:grid;
@@ -125,13 +132,30 @@ body {
 
 <!-- المضخات -->
 <div class="pumps">
-<div class="uniform-btn pumpColor" onclick="selectPump(this,1,'بنزين',58.97)">بنزين 1</div>
-<div class="uniform-btn pumpColor" onclick="selectPump(this,2,'بنزين',58.97)">بنزين 2</div>
-<div class="uniform-btn pumpColor" onclick="selectPump(this,3,'ديزل1',56.35)">ديزل 1</div>
-<div class="uniform-btn pumpColor" onclick="selectPump(this,4,'ديزل2',56.35)">ديزل 2</div>
+
+<div class="uniform-btn petrol pump-box" onclick="selectPump(this,1,'بنزين',58.97)">
+<img src="https://cdn-icons-png.flaticon.com/512/2972/2972185.png">
+<span>بنزين 1</span>
 </div>
 
-<!-- الأرقام -->
+<div class="uniform-btn petrol pump-box" onclick="selectPump(this,2,'بنزين',58.97)">
+<img src="https://cdn-icons-png.flaticon.com/512/2972/2972185.png">
+<span>بنزين 2</span>
+</div>
+
+<div class="uniform-btn diesel pump-box" onclick="selectPump(this,3,'ديزل1',56.35)">
+<img src="https://cdn-icons-png.flaticon.com/512/684/684908.png">
+<span>ديزل 1</span>
+</div>
+
+<div class="uniform-btn diesel pump-box" onclick="selectPump(this,4,'ديزل2',56.35)">
+<img src="https://cdn-icons-png.flaticon.com/512/684/684908.png">
+<span>ديزل 2</span>
+</div>
+
+</div>
+
+<!-- لوحة الأرقام -->
 <div class="keypad">
 <button class="uniform-btn blue" onclick="add(7)">7</button>
 <button class="uniform-btn blue" onclick="add(8)">8</button>
@@ -148,27 +172,19 @@ body {
 
 <!-- الأزرار -->
 <div class="actions">
-  <button class="uniform-btn green" onclick="startFuel()">ابدأ</button>
-  <button class="uniform-btn gray" onclick="toggleBill()">📋 السجل</button>
-  <button class="uniform-btn red" onclick="cancel()">إلغاء</button>
+<button class="uniform-btn green" onclick="startFuel()">ابدأ</button>
+<button class="uniform-btn gray" onclick="toggleBill()">📋 السجل</button>
+<button class="uniform-btn red" onclick="cancel()">إلغاء</button>
 </div>
 
 </div>
 </div>
 
-<!-- نافذة السجل -->
+<!-- السجل -->
 <div id="billModal">
 <h3>السجل</h3>
 
-<div id="bill" style="
-flex:1;
-overflow:auto;
-background:#0a2540;
-padding:10px;
-border-radius:10px;
-margin-bottom:10px;
-"></div>
-
+<div id="bill" style="flex:1;overflow:auto;background:#0a2540;padding:10px;border-radius:10px;"></div>
 <div id="total">المجموع: 0 أوقية</div>
 
 <button onclick="toggleBill()" class="uniform-btn red">إغلاق</button>
@@ -185,7 +201,7 @@ function beep(){
  o.start();o.stop(ctx.currentTime+0.05);
 }
 
-// خزانات
+// الخزانات
 let petrolTank=2000;
 let diesel1=1000;
 let diesel2=1000;
@@ -194,8 +210,8 @@ let diesel2=1000;
 let pump=null,input="",total=0,type="",price=0;
 
 function selectPump(el,p,t,pr){
- document.querySelectorAll(".pumpColor").forEach(x=>x.classList.remove("green"));
- el.classList.add("green");
+ document.querySelectorAll(".pump-box").forEach(x=>x.style.outline="none");
+ el.style.outline="3px solid white";
  pump=p;type=t;price=pr;
 }
 
