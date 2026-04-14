@@ -9,72 +9,154 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <style>
-body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
+body{
+ font-family:Arial;
+ background:#f1f5f9;
+ direction:rtl;
+ margin:0;
+}
 
 /* 🔐 LOGIN */
 #loginBox{
  position:fixed;
  top:0;left:0;width:100%;height:100%;
  background:#000000cc;
- display:flex;justify-content:center;align-items:center;
+ display:flex;
+ justify-content:center;
+ align-items:center;
 }
 .login-card{
- background:white;padding:30px;border-radius:20px;width:300px;text-align:center
+ background:white;
+ padding:40px;
+ border-radius:25px;
+ width:320px;
+ text-align:center;
 }
 .login-card input{
- width:100%;padding:10px;margin:10px 0;font-size:18px
+ width:100%;
+ padding:15px;
+ margin:10px 0;
+ font-size:20px;
 }
 .login-card button{
- width:100%;padding:15px;background:#c9a24b;color:white;border:none;border-radius:10px
+ width:100%;
+ padding:18px;
+ font-size:20px;
+ background:#c9a24b;
+ color:white;
+ border:none;
+ border-radius:15px;
 }
 
 /* UI */
 .container{padding:15px}
-.card{background:linear-gradient(135deg,#c9a24b,#a67c2d);color:white;padding:15px;border-radius:15px}
+.card{
+ background:linear-gradient(135deg,#c9a24b,#a67c2d);
+ color:white;
+ padding:20px;
+ border-radius:20px;
+ font-size:22px;
+ text-align:center;
+}
 
+/* stock */
 .stock{
- background:white;padding:10px;margin-top:10px;border-radius:10px;
- display:flex;justify-content:space-between;align-items:center
+ background:white;
+ padding:15px;
+ margin-top:10px;
+ border-radius:15px;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ font-size:20px;
 }
 .stock button{
- background:#22c55e;color:white;border:none;padding:5px 10px;border-radius:5px
+ background:#22c55e;
+ color:white;
+ border:none;
+ padding:10px 15px;
+ border-radius:10px;
+ font-size:16px;
 }
 
+/* display */
 .display{
- background:white;padding:20px;font-size:30px;text-align:center;margin:10px 0;border-radius:10px
+ background:white;
+ padding:30px;
+ font-size:40px;
+ text-align:center;
+ margin:15px 0;
+ border-radius:15px;
+ color:#c9a24b;
+ font-weight:bold;
 }
 
-/* 🔥 pumps bigger */
+/* 🔥 pumps BIG */
 .pumps{
  display:grid;
  grid-template-columns:repeat(2,1fr);
- gap:15px;
+ gap:20px;
 }
+
 .pump{
- padding:40px;
- font-size:22px;
- border-radius:20px;
+ padding:60px;
+ font-size:26px;
+ border-radius:25px;
  text-align:center;
  font-weight:bold;
+ box-shadow:0 8px 20px rgba(0,0,0,0.2);
+ cursor:pointer;
+ transition:0.3s;
 }
+
+.pump:active{
+ transform:scale(0.95);
+}
+
 .petrol{background:#22c55e;color:white}
 .diesel{background:#facc15}
 
-/* keypad */
-.keypad{display:none;grid-template-columns:repeat(3,1fr);gap:10px}
-.keypad button{padding:20px;font-size:20px}
+/* keypad BIG */
+.keypad{
+ display:none;
+ grid-template-columns:repeat(3,1fr);
+ gap:15px;
+ margin-top:15px;
+}
 
-/* actions */
-.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
-.btn{padding:15px;border:none;border-radius:10px}
+.keypad button{
+ padding:25px;
+ font-size:22px;
+ border-radius:15px;
+ border:none;
+ background:#e5e7eb;
+}
+
+/* actions BIG */
+.actions{
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+ gap:15px;
+ margin-top:15px;
+}
+
+.btn{
+ padding:20px;
+ font-size:20px;
+ border:none;
+ border-radius:15px;
+ font-weight:bold;
+}
+
 .green{background:#c9a24b;color:white}
 .red{background:#ef4444;color:white}
+
 </style>
 </head>
 
 <body>
 
-<!-- 🔐 LOGIN -->
+<!-- LOGIN -->
 <div id="loginBox">
 <div class="login-card">
 <h2>🔐 تسجيل الدخول</h2>
@@ -88,7 +170,6 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 
 <div class="card">⛽ Fuel Pro Cloud</div>
 
-<!-- stock -->
 <div class="stock">⛽ بنزين <span id="pStock"></span> <button onclick="addStock('petrol')">+</button></div>
 <div class="stock">🟡 مازوت1 <span id="d1Stock"></span> <button onclick="addStock('d1')">+</button></div>
 <div class="stock">🟡 مازوت2 <span id="d2Stock"></span> <button onclick="addStock('d2')">+</button></div>
@@ -227,7 +308,9 @@ function openLog(){
 }
 
 function cancel(){
- input="";display.innerText="0";keypad.style.display="none";
+ input="";
+ display.innerText="0";
+ keypad.style.display="none";
 }
 
 </script>
