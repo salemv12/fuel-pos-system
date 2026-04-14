@@ -15,12 +15,7 @@ body {
 
 .container {display:flex;height:100vh;}
 
-.left {width:30%;background:#133b5c;padding:10px;}
-.bill {background:#0a2540;height:60%;padding:10px;overflow:auto;border-radius:10px;}
-.total {margin-top:10px;font-size:20px;}
-.pay {width:100%;padding:15px;background:#16a34a;border:none;border-radius:10px;color:white;}
-
-.center {width:40%;padding:10px;}
+.center {width:100%;padding:15px;}
 
 .display {
   background:#000;
@@ -41,7 +36,6 @@ body {
 
 .btn {
   padding:10px;
-  margin:5px;
   border:none;
   border-radius:10px;
   color:white;
@@ -84,7 +78,7 @@ body {
   color:white;
 }
 
-/* 🔥 أزرار التحكم الجديدة */
+/* الأزرار الكبيرة */
 .actions {
   margin-top:15px;
   display:flex;
@@ -99,8 +93,20 @@ body {
   font-weight:bold;
 }
 
-.big:active {
-  transform:scale(0.95);
+/* نافذة السجل */
+#billModal {
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:85%;
+  height:70%;
+  background:#0f3b5f;
+  border-radius:15px;
+  padding:15px;
+  display:none;
+  flex-direction:column;
+  z-index:999;
 }
 </style>
 </head>
@@ -108,18 +114,9 @@ body {
 <body>
 
 <div class="container">
-
-<!-- LEFT -->
-<div class="left">
-<h3>الفاتورة</h3>
-<div class="bill" id="bill"></div>
-<div class="total" id="total">المجموع: 0 أوقية</div>
-<button class="pay" onclick="pay()">💳 دفع</button>
-</div>
-
-<!-- CENTER -->
 <div class="center">
 
+<!-- الخزانات -->
 <div class="tanks">
 <p id="tankPetrol">خزان البنزين: 2000 لتر</p>
 <button onclick="refill('petrol')" class="btn green">+ تعبئة البنزين</button>
@@ -131,8 +128,10 @@ body {
 <button onclick="refill('diesel2')" class="btn gray">+ تعبئة مازوت 2</button>
 </div>
 
+<!-- الشاشة -->
 <div class="display" id="display">0</div>
 
+<!-- المضخات -->
 <div class="pumps">
 <div class="pump" onclick="selectPump(this,1,'بنزين',58.97)">بنزين 1</div>
 <div class="pump" onclick="selectPump(this,2,'بنزين',58.97)">بنزين 2</div>
@@ -140,6 +139,7 @@ body {
 <div class="pump" onclick="selectPump(this,4,'ديزل2',56.35)">ديزل 2</div>
 </div>
 
+<!-- الأرقام -->
 <div class="keypad">
 <button onclick="add(7)">7</button>
 <button onclick="add(8)">8</button>
@@ -154,28 +154,46 @@ body {
 <button onclick="clearInput()">مسح</button>
 </div>
 
-<!-- 🔥 الأزرار الكبيرة تحت -->
+<!-- الأزرار -->
 <div class="actions">
   <button class="btn big green" onclick="startFuel()">ابدأ</button>
+  <button class="btn big gray" onclick="toggleBill()">📋 السجل</button>
   <button class="btn big red" onclick="cancel()">إلغاء</button>
 </div>
 
 </div>
+</div>
 
+<!-- نافذة السجل -->
+<div id="billModal">
+<h3>السجل</h3>
+
+<div id="bill" style="
+flex:1;
+overflow:auto;
+background:#0a2540;
+padding:10px;
+border-radius:10px;
+margin-bottom:10px;
+"></div>
+
+<div id="total">المجموع: 0 أوقية</div>
+
+<button onclick="toggleBill()" class="btn red">إغلاق</button>
 </div>
 
 <script>
 
-// الصوت
+// صوت
 const ctx=new (window.AudioContext||window.webkitAudioContext)();
-function beep(f,t,v){
+function beep(){
  let o=ctx.createOscillator(),g=ctx.createGain();
  o.connect(g);g.connect(ctx.destination);
- o.frequency.value=f;g.gain.value=v;
- o.start();o.stop(ctx.currentTime+t);
+ o.frequency.value=800;g.gain.value=0.1;
+ o.start();o.stop(ctx.currentTime+0.05);
 }
 
-// الخزانات
+// خزانات
 let petrolTank=2000;
 let diesel1=1000;
 let diesel2=1000;
@@ -192,7 +210,7 @@ function selectPump(el,p,t,pr){
 function add(n){
  input+=n;
  document.getElementById("display").innerText=input;
- beep(800,0.05,0.1);
+ beep();
 }
 
 function clearInput(){
@@ -200,11 +218,10 @@ function clearInput(){
  document.getElementById("display").innerText="0";
 }
 
-// التعبئة
 function refill(type){
  let amount=prompt("كم لتر تريد إضافته؟");
  amount=parseFloat(amount);
- if(isNaN(amount)||amount<=0)return alert("كمية غير صحيحة");
+ if(isNaN(amount)) return;
 
  if(type==="petrol")petrolTank+=amount;
  if(type==="diesel1")diesel1+=amount;
@@ -213,33 +230,20 @@ function refill(type){
  updateUI();
 }
 
-// تحديث
 function updateUI(){
  document.getElementById("tankPetrol").innerText="خزان البنزين: "+petrolTank.toFixed(2);
  document.getElementById("tankDiesel1").innerText="مازوت خزان 1: "+diesel1.toFixed(2);
  document.getElementById("tankDiesel2").innerText="مازوت خزان 2: "+diesel2.toFixed(2);
 }
 
-// التشغيل
 function startFuel(){
  if(!pump)return alert("اختر مضخة");
 
  let liters=parseFloat(input||0);
 
- if(type==="بنزين"){
-  if(liters>petrolTank)return alert("بنزين قليل");
-  petrolTank-=liters;
- }
-
- if(type==="ديزل1"){
-  if(liters>diesel1)return alert("مازوت قليل");
-  diesel1-=liters;
- }
-
- if(type==="ديزل2"){
-  if(liters>diesel2)return alert("مازوت قليل");
-  diesel2-=liters;
- }
+ if(type==="بنزين"){ if(liters>petrolTank)return alert("بنزين قليل"); petrolTank-=liters; }
+ if(type==="ديزل1"){ if(liters>diesel1)return alert("مازوت قليل"); diesel1-=liters; }
+ if(type==="ديزل2"){ if(liters>diesel2)return alert("مازوت قليل"); diesel2-=liters; }
 
  updateUI();
 
@@ -247,17 +251,17 @@ function startFuel(){
  total+=cost;
 
  document.getElementById("bill").innerHTML+=
- `<p>${type} - ${liters} لتر = ${cost.toFixed(2)}</p>`;
+ `<p>${type} - ${liters} لتر = ${cost.toFixed(2)} أوقية</p>`;
 
- document.getElementById("total").innerText="المجموع: "+total;
+ document.getElementById("total").innerText="المجموع: "+total.toFixed(2)+" أوقية";
 
  input="";
  document.getElementById("display").innerText="0";
 }
 
-function pay(){
- alert("تم الدفع: "+total);
- location.reload();
+function toggleBill(){
+ let modal=document.getElementById("billModal");
+ modal.style.display = modal.style.display==="flex" ? "none" : "flex";
 }
 
 function cancel(){
