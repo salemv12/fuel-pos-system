@@ -2,70 +2,207 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>Fuel POS</title>
+<title>Fuel POS Pro</title>
 
 <style>
 body {
+  margin:0;
   font-family: Arial;
-  background:#0f172a;
+  background:#0b132b;
   color:white;
-  text-align:center;
+}
+
+.container {
+  display:flex;
+  height:100vh;
+}
+
+/* LEFT */
+.left {
+  width:30%;
+  background:#1c2541;
+  padding:10px;
+}
+
+.bill {
+  background:#0b132b;
+  height:60%;
+  padding:10px;
+  overflow:auto;
+  border-radius:10px;
+}
+
+.total {
+  margin-top:10px;
+  font-size:20px;
+}
+
+.pay {
+  width:100%;
+  padding:15px;
+  background:#22c55e;
+  border:none;
+  border-radius:10px;
+  margin-top:10px;
+}
+
+/* CENTER */
+.center {
+  width:40%;
+  padding:10px;
+}
+
+.pumps {
+  display:grid;
+  grid-template-columns: repeat(3,1fr);
+  gap:10px;
 }
 
 .pump {
-  background:#1e293b;
+  background:#3a506b;
   padding:20px;
-  margin:10px;
+  text-align:center;
   border-radius:10px;
-  display:inline-block;
   cursor:pointer;
 }
 
-button {
-  padding:15px;
-  margin:10px;
+.pump.active {
+  background:#22c55e;
+}
+
+/* KEYPAD */
+.keypad {
+  margin-top:20px;
+  display:grid;
+  grid-template-columns: repeat(3,1fr);
+  gap:10px;
+}
+
+.keypad button {
+  padding:20px;
+  font-size:18px;
   border:none;
   border-radius:10px;
-  background:#22c55e;
-  color:white;
 }
+
+/* RIGHT */
+.right {
+  width:30%;
+  padding:10px;
+}
+
+.btn {
+  width:100%;
+  padding:15px;
+  margin:5px 0;
+  border:none;
+  border-radius:10px;
+}
+
+.green {background:#22c55e;}
+.red {background:#ef4444;}
+.gray {background:#475569;}
 
 </style>
 </head>
 
 <body>
 
-<h1>⛽ Fuel POS System</h1>
+<div class="container">
 
-<div class="pump" onclick="selectPump(1)">Pump 1</div>
-<div class="pump" onclick="selectPump(2)">Pump 2</div>
-<div class="pump" onclick="selectPump(3)">Pump 3</div>
+<!-- LEFT -->
+<div class="left">
+<h3>الفاتورة</h3>
+<div class="bill" id="bill"></div>
+<div class="total" id="total">المجموع: 0</div>
+<button class="pay" onclick="pay()">💳 دفع</button>
+</div>
 
-<br>
+<!-- CENTER -->
+<div class="center">
+<h3>المضخات</h3>
 
-<input id="liters" type="number" placeholder="عدد اللترات">
+<div class="pumps">
+<div class="pump" onclick="selectPump(this,1)">1</div>
+<div class="pump" onclick="selectPump(this,2)">2</div>
+<div class="pump" onclick="selectPump(this,3)">3</div>
+<div class="pump" onclick="selectPump(this,4)">4</div>
+<div class="pump" onclick="selectPump(this,5)">5</div>
+<div class="pump" onclick="selectPump(this,6)">6</div>
+</div>
 
-<br>
+<div class="keypad">
+<button onclick="add(7)">7</button>
+<button onclick="add(8)">8</button>
+<button onclick="add(9)">9</button>
+<button onclick="add(4)">4</button>
+<button onclick="add(5)">5</button>
+<button onclick="add(6)">6</button>
+<button onclick="add(1)">1</button>
+<button onclick="add(2)">2</button>
+<button onclick="add(3)">3</button>
+<button onclick="add(0)">0</button>
+<button onclick="clearInput()">CLR</button>
+</div>
+</div>
 
-<button onclick="start()">Start Fuel</button>
+<!-- RIGHT -->
+<div class="right">
+<button class="btn green" onclick="startFuel()">START</button>
+<button class="btn gray">PREPAY</button>
+<button class="btn gray">TRANSFER</button>
+<button class="btn red">STOP</button>
+<button class="btn red" onclick="cancel()">CANCEL</button>
+</div>
 
-<h2 id="result"></h2>
+</div>
 
 <script>
+
 let pump = null;
+let input = "";
+let total = 0;
 
-function selectPump(p) {
+function selectPump(el, p){
+  document.querySelectorAll(".pump").forEach(x=>x.classList.remove("active"));
+  el.classList.add("active");
   pump = p;
-  alert("تم اختيار المضخة " + p);
 }
 
-function start() {
-  let liters = document.getElementById("liters").value;
-  let total = liters * 1;
-
-  document.getElementById("result").innerText =
-    "المضخة " + pump + " - السعر: " + total;
+function add(n){
+  input += n;
 }
+
+function clearInput(){
+  input = "";
+}
+
+function startFuel(){
+  if(!pump) return alert("اختر مضخة");
+
+  let liters = parseFloat(input || 0);
+  let price = 1;
+
+  let cost = liters * price;
+  total += cost;
+
+  document.getElementById("bill").innerHTML +=
+    `<p>مضخة ${pump} - ${liters}L = ${cost}</p>`;
+
+  document.getElementById("total").innerText = "المجموع: " + total;
+
+  input = "";
+}
+
+function pay(){
+  alert("تم الدفع: " + total);
+  location.reload();
+}
+
+function cancel(){
+  location.reload();
+}
+
 </script>
 
 </body>
