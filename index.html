@@ -1,1 +1,72 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>Fuel POS</title>
 
+<style>
+body {
+  font-family: Arial;
+  background:#0f172a;
+  color:white;
+  text-align:center;
+}
+
+.pump {
+  background:#1e293b;
+  padding:20px;
+  margin:10px;
+  border-radius:10px;
+  display:inline-block;
+  cursor:pointer;
+}
+
+button {
+  padding:15px;
+  margin:10px;
+  border:none;
+  border-radius:10px;
+  background:#22c55e;
+  color:white;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>⛽ Fuel POS System</h1>
+
+<div class="pump" onclick="selectPump(1)">Pump 1</div>
+<div class="pump" onclick="selectPump(2)">Pump 2</div>
+<div class="pump" onclick="selectPump(3)">Pump 3</div>
+
+<br>
+
+<input id="liters" type="number" placeholder="عدد اللترات">
+
+<br>
+
+<button onclick="start()">Start Fuel</button>
+
+<h2 id="result"></h2>
+
+<script>
+let pump = null;
+
+function selectPump(p) {
+  pump = p;
+  alert("تم اختيار المضخة " + p);
+}
+
+function start() {
+  let liters = document.getElementById("liters").value;
+  let total = liters * 1;
+
+  document.getElementById("result").innerText =
+    "المضخة " + pump + " - السعر: " + total;
+}
+</script>
+
+</body>
+</html>
