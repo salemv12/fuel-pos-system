@@ -33,9 +33,7 @@ body {
   box-shadow:0 4px 10px rgba(0,0,0,0.3);
 }
 
-.uniform-btn:active {
-  transform:scale(0.95);
-}
+.uniform-btn:active {transform:scale(0.95);}
 
 /* ألوان */
 .green{background:#22c55e;}
@@ -45,6 +43,29 @@ body {
 
 .petrol {background:#16a34a;}
 .diesel {background:#eab308;color:black;}
+
+/* المؤشر */
+.indicator {
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  margin-top:5px;
+}
+.indicator.green {background:#22c55e;}
+.indicator.yellow {background:#eab308;}
+
+/* أيقونة */
+.pump-icon {font-size:28px;}
+
+/* تأثير الضخ */
+.pumping {
+  animation: pumpGlow 1s infinite alternate;
+}
+
+@keyframes pumpGlow {
+  from {transform:scale(1);box-shadow:0 0 10px rgba(255,255,255,0.2);}
+  to {transform:scale(1.05);box-shadow:0 0 25px rgba(255,255,255,0.9);}
+}
 
 /* الخزانات */
 .tanks {
@@ -72,10 +93,6 @@ body {
   gap:10px;
 }
 
-.pump-box img {
-  width:45px;
-}
-
 /* الأرقام */
 .keypad {
   margin-top:10px;
@@ -84,11 +101,11 @@ body {
   gap:10px;
 }
 
-/* أزرار التحكم */
+/* الأزرار */
 .actions {
   margin-top:15px;
   display:grid;
-  grid-template-columns: repeat(3,1fr);
+  grid-template-columns:repeat(3,1fr);
   gap:10px;
 }
 
@@ -105,7 +122,6 @@ body {
   padding:15px;
   display:none;
   flex-direction:column;
-  z-index:999;
 }
 </style>
 </head>
@@ -134,23 +150,27 @@ body {
 <div class="pumps">
 
 <div class="uniform-btn petrol pump-box" onclick="selectPump(this,1,'بنزين',58.97)">
-<img src="https://cdn-icons-png.flaticon.com/512/2972/2972185.png">
-<span>بنزين 1</span>
+  <span class="pump-icon">⛽</span>
+  <span>بنزين 1</span>
+  <span class="indicator green"></span>
 </div>
 
 <div class="uniform-btn petrol pump-box" onclick="selectPump(this,2,'بنزين',58.97)">
-<img src="https://cdn-icons-png.flaticon.com/512/2972/2972185.png">
-<span>بنزين 2</span>
+  <span class="pump-icon">⛽</span>
+  <span>بنزين 2</span>
+  <span class="indicator green"></span>
 </div>
 
 <div class="uniform-btn diesel pump-box" onclick="selectPump(this,3,'ديزل1',56.35)">
-<img src="https://cdn-icons-png.flaticon.com/512/684/684908.png">
-<span>ديزل 1</span>
+  <span class="pump-icon">⛽</span>
+  <span>ديزل 1</span>
+  <span class="indicator yellow"></span>
 </div>
 
 <div class="uniform-btn diesel pump-box" onclick="selectPump(this,4,'ديزل2',56.35)">
-<img src="https://cdn-icons-png.flaticon.com/512/684/684908.png">
-<span>ديزل 2</span>
+  <span class="pump-icon">⛽</span>
+  <span>ديزل 2</span>
+  <span class="indicator yellow"></span>
 </div>
 
 </div>
@@ -201,7 +221,7 @@ function beep(){
  o.start();o.stop(ctx.currentTime+0.05);
 }
 
-// الخزانات
+// خزانات
 let petrolTank=2000;
 let diesel1=1000;
 let diesel2=1000;
@@ -257,6 +277,11 @@ function startFuel(){
 
  let cost=liters*price;
  total+=cost;
+
+ let activePump=document.querySelectorAll(".pump-box")[pump-1];
+ activePump.classList.add("pumping");
+
+ setTimeout(()=>{activePump.classList.remove("pumping");},2000);
 
  document.getElementById("bill").innerHTML+=
  `<p>${type} - ${liters} لتر = ${cost.toFixed(2)} أوقية</p>`;
