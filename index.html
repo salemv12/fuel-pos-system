@@ -5,74 +5,148 @@
 <title>Fuel Pro System</title>
 
 <style>
-body {font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
-
-/* login */
-#loginBox {
- position:fixed;top:0;left:0;width:100%;height:100%;
- background:#000000aa;display:flex;align-items:center;justify-content:center;
-}
-.login-card {
- background:white;padding:20px;border-radius:15px;width:300px;text-align:center;
+body {
+  font-family:Arial;
+  background:#f1f5f9;
+  direction:rtl;
+  margin:0;
 }
 
-/* general */
 .container{padding:15px}
-.card{background:linear-gradient(135deg,#c9a24b,#a67c2d);color:white;padding:20px;border-radius:20px}
 
-.display{background:white;color:#c9a24b;padding:20px;border-radius:15px;font-size:30px;text-align:center;margin:10px 0}
+/* HEADER */
+.card{
+  background:linear-gradient(135deg,#c9a24b,#a67c2d);
+  color:white;
+  padding:20px;
+  border-radius:20px;
+  margin-bottom:10px;
+}
 
-/* pumps */
-.pumps{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}
-.pump{padding:30px;border-radius:20px;text-align:center;font-size:20px;font-weight:bold;cursor:pointer}
-.petrol{background:#22c55e;color:white}
-.diesel{background:#facc15}
-.pump.active{outline:3px solid #000}
-.pump span{display:block;font-size:40px}
+/* 🔥 المخزون */
+.stock-card{
+  background:white;
+  padding:15px;
+  border-radius:15px;
+  margin-top:10px;
+  font-size:22px;
+  font-weight:bold;
+  color:#0f172a;
+  display:flex;
+  justify-content:space-between;
+}
 
-/* keypad */
-.keypad{display:none;grid-template-columns:repeat(3,1fr);gap:10px}
-.keypad button{padding:20px;font-size:20px}
+.stock-card span{
+  font-size:24px;
+  font-weight:900;
+  color:#c9a24b;
+}
 
-/* buttons */
-.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
-.btn{padding:15px;border:none;border-radius:10px}
-.green{background:#c9a24b;color:white}
-.red{background:#ef4444;color:white}
+/* شريط */
+.bar{
+  width:100%;
+  height:10px;
+  background:#e2e8f0;
+  border-radius:10px;
+  margin-top:5px;
+  overflow:hidden;
+}
 
-/* stock */
-.stock-card{background:white;padding:10px;border-radius:10px;margin:5px 0;display:flex;justify-content:space-between}
+.bar div{
+  height:100%;
+  width:100%;
+  background:#22c55e;
+  transition:0.3s;
+}
 
-/* modal */
-.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#00000088}
-.modal-box{background:white;margin:40px auto;padding:20px;border-radius:15px;width:90%}
+/* شاشة */
+.display{
+  background:white;
+  color:#c9a24b;
+  padding:20px;
+  border-radius:15px;
+  font-size:32px;
+  text-align:center;
+  margin:10px 0;
+}
+
+/* المضخات */
+.pumps{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:15px;
+}
+
+.pump{
+  padding:30px;
+  border-radius:20px;
+  text-align:center;
+  font-size:20px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.petrol{background:#22c55e;color:white;}
+.diesel{background:#facc15;}
+
+.pump span{
+  display:block;
+  font-size:40px;
+}
+
+/* لوحة الأرقام */
+.keypad{
+  display:none;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:10px;
+}
+
+.keypad button{
+  padding:20px;
+  font-size:20px;
+}
+
+/* أزرار */
+.actions{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:10px;
+}
+
+.btn{
+  padding:15px;
+  border:none;
+  border-radius:10px;
+}
+
+.green{background:#c9a24b;color:white;}
+.red{background:#ef4444;color:white;}
+
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div id="loginBox">
-<div class="login-card">
-<h3>🔐 تسجيل الدخول</h3>
-<input id="user" placeholder="المستخدم"><br><br>
-<input id="pass" type="password" placeholder="كلمة المرور"><br><br>
-<button onclick="login()">دخول</button>
-</div>
-</div>
-
 <div class="container">
 
 <div class="card">⛽ Fuel Pro System</div>
 
-<!-- stock -->
-<div class="stock-card">بنزين: <span id="pStock">2000</span></div>
-<div class="stock-card">مازوت1: <span id="d1Stock">1000</span></div>
-<div class="stock-card">مازوت2: <span id="d2Stock">1000</span></div>
+<!-- 🔥 المخزون -->
+<div class="stock-card">⛽ البنزين <span id="pStock">2000</span></div>
+<div class="bar"><div id="pBar"></div></div>
 
+<div class="stock-card">🟡 مازوت 1 <span id="d1Stock">1000</span></div>
+<div class="bar"><div id="d1Bar"></div></div>
+
+<div class="stock-card">🟡 مازوت 2 <span id="d2Stock">1000</span></div>
+<div class="bar"><div id="d2Bar"></div></div>
+
+<!-- الشاشة -->
 <div class="display" id="display">0</div>
 
-<!-- pumps -->
+<!-- المضخات -->
 <div class="pumps">
 <div class="pump petrol" onclick="selectPump(this,1,'بنزين',58.97)"><span>⛽</span>بنزين 1</div>
 <div class="pump petrol" onclick="selectPump(this,2,'بنزين',58.97)"><span>⛽</span>بنزين 2</div>
@@ -80,7 +154,7 @@ body {font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 <div class="pump diesel" onclick="selectPump(this,4,'ديزل',56.35)"><span>⛽</span>ديزل 2</div>
 </div>
 
-<!-- keypad -->
+<!-- لوحة الأرقام -->
 <div class="keypad" id="keypad">
 <button onclick="add(7)">7</button>
 <button onclick="add(8)">8</button>
@@ -95,6 +169,7 @@ body {font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 <button onclick="clearInput()">مسح</button>
 </div>
 
+<!-- الأزرار -->
 <div class="actions">
 <button class="btn green" onclick="startFuel()">ابدأ</button>
 <button class="btn" onclick="openLog()">📋</button>
@@ -103,90 +178,87 @@ body {font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 
 </div>
 
-<!-- LOG -->
-<div class="modal" id="logModal">
-<div class="modal-box">
-<h3>السجل</h3>
-<div id="logList"></div>
-<button onclick="copyLog()">📋 نسخ</button>
-<button onclick="clearLog()">🗑 حذف</button>
-<button onclick="closeLog()">إغلاق</button>
-</div>
-</div>
-
-<!-- REPORT -->
-<div class="modal" id="reportModal">
-<div class="modal-box">
-<h3>📊 تقرير اليوم</h3>
-<div id="report"></div>
-<button onclick="closeReport()">إغلاق</button>
-</div>
-</div>
-
 <script>
 
-// LOGIN
-function login(){
- let u=user.value,p=pass.value;
- if(u==="admin"&&p==="1234"){role="admin";}
- else if(u==="cash"&&p==="0000"){role="cash";}
- else return alert("خطأ");
- loginBox.style.display="none";
-}
-
-// data
 let petrol=2000,d1=1000,d2=1000;
 let pump=null,input="",type="",price=0;
-let logs=JSON.parse(localStorage.getItem("logs")||"[]");
-
-// functions
-function selectPump(el,p,t,pr){
- document.querySelectorAll(".pump").forEach(x=>x.classList.remove("active"));
- el.classList.add("active");
- pump=p;type=t;price=pr;
- keypad.style.display="grid";
-}
-
-function add(n){input+=n;display.innerText=input;}
-function clearInput(){input="";display.innerText="0";}
-
-function startFuel(){
- let l=parseFloat(input||0);
- if(type==="بنزين"){if(l>petrol)return;petrol-=l;}
- else{if(pump==3){if(l>d1)return;d1-=l;}else{if(l>d2)return;d2-=l;}}
- updateStock();
-
- let cost=l*price;
- let time=new Date().toLocaleString();
- let log=`${time} | ${type} | ${l}L | ${cost}`;
- logs.unshift(log);
- localStorage.setItem("logs",JSON.stringify(logs));
-
- input="";display.innerText="0";keypad.style.display="none";
-}
 
 function updateStock(){
  pStock.innerText=petrol;
  d1Stock.innerText=d1;
  d2Stock.innerText=d2;
+
+ updateBar(pBar, petrol, 2000);
+ updateBar(d1Bar, d1, 1000);
+ updateBar(d2Bar, d2, 1000);
 }
 
-function cancel(){input="";display.innerText="0";keypad.style.display="none";}
+/* 🔥 لون الشريط */
+function updateBar(el,val,max){
+ let percent=(val/max)*100;
+ el.style.width=percent+"%";
 
-function openLog(){
- logList.innerHTML=logs.map(l=>`<p>${l}</p>`).join("");
- logModal.style.display="block";
+ if(percent<30){
+  el.style.background="#ef4444";
+  alert("⚠️ المخزون منخفض!");
+ }else if(percent<60){
+  el.style.background="#facc15";
+ }else{
+  el.style.background="#22c55e";
+ }
 }
 
-function closeLog(){logModal.style.display="none";}
+/* اختيار مضخة */
+function selectPump(el,p,t,pr){
+ document.querySelectorAll(".pump").forEach(x=>x.style.outline="none");
+ el.style.outline="3px solid black";
 
-function clearLog(){
- logs=[];localStorage.removeItem("logs");openLog();
+ pump=p;type=t;price=pr;
+ keypad.style.display="grid";
 }
 
-function copyLog(){
- navigator.clipboard.writeText(logs.join("\n"));
- alert("تم النسخ");
+/* إدخال */
+function add(n){
+ input+=n;
+ display.innerText=input;
+}
+
+function clearInput(){
+ input="";
+ display.innerText="0";
+}
+
+/* ضخ */
+function startFuel(){
+ if(!pump)return alert("اختر مضخة");
+
+ let l=parseFloat(input||0);
+
+ if(type==="بنزين"){
+  if(l>petrol)return alert("المخزون غير كافي");
+  petrol-=l;
+ }else{
+  if(pump==3){
+   if(l>d1)return alert("المخزون غير كافي");
+   d1-=l;
+  }else{
+   if(l>d2)return alert("المخزون غير كافي");
+   d2-=l;
+  }
+ }
+
+ updateStock();
+
+ input="";
+ display.innerText="0";
+ keypad.style.display="none";
+}
+
+/* إلغاء */
+function cancel(){
+ input="";
+ display.innerText="0";
+ keypad.style.display="none";
 }
 
 updateStock();
