@@ -5,7 +5,6 @@
 <title>نظام محطة الوقود</title>
 
 <style>
-
 body {
   margin:0;
   font-family: Arial;
@@ -14,17 +13,40 @@ body {
   direction: rtl;
 }
 
-.container {
-  padding:15px;
-}
+.container {padding:15px;}
 
-/* بطاقة مثل البنك */
+/* البطاقة */
 .card {
   background: linear-gradient(135deg,#c9a24b,#a67c2d);
   color:white;
   border-radius:20px;
   padding:20px;
-  margin-bottom:15px;
+  margin-bottom:10px;
+}
+
+/* المخزون */
+.stock {
+  display:grid;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.stock-card {
+  background:white;
+  padding:10px;
+  border-radius:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border:1px solid #e2e8f0;
+}
+
+.stock-card button {
+  background:#c9a24b;
+  color:white;
+  border:none;
+  padding:5px 10px;
+  border-radius:8px;
 }
 
 /* الشاشة */
@@ -35,7 +57,7 @@ body {
   padding:20px;
   text-align:center;
   font-size:32px;
-  margin-bottom:15px;
+  margin-bottom:10px;
 }
 
 /* المضخات */
@@ -47,10 +69,9 @@ body {
 
 .pump {
   background:white;
+  padding:15px;
   border-radius:15px;
-  padding:20px;
   text-align:center;
-  font-size:18px;
   border:1px solid #e2e8f0;
   cursor:pointer;
 }
@@ -64,17 +85,16 @@ body {
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:10px;
-  margin-top:15px;
+  margin-top:10px;
 }
 
 .keypad button {
   padding:20px;
   font-size:20px;
-  background:white;
   border:none;
   border-radius:12px;
+  background:white;
   border:1px solid #e2e8f0;
-  cursor:pointer;
 }
 
 /* الأزرار */
@@ -82,7 +102,7 @@ body {
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:10px;
-  margin-top:15px;
+  margin-top:10px;
 }
 
 .btn {
@@ -90,38 +110,11 @@ body {
   border:none;
   border-radius:12px;
   font-size:18px;
-  cursor:pointer;
 }
 
-.green {
-  background:#c9a24b;
-  color:white;
-}
-
-.red {
-  background:#ef4444;
-  color:white;
-}
-
-.gray {
-  background:white;
-  border:1px solid #e2e8f0;
-}
-
-/* السجل */
-#billModal {
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  width:85%;
-  height:70%;
-  background:white;
-  border-radius:15px;
-  padding:15px;
-  display:none;
-  flex-direction:column;
-}
+.green {background:#c9a24b;color:white;}
+.red {background:#ef4444;color:white;}
+.gray {background:white;border:1px solid #e2e8f0;}
 
 </style>
 </head>
@@ -130,37 +123,45 @@ body {
 
 <div class="container">
 
-<!-- بطاقة -->
+<!-- البطاقة -->
 <div class="card">
-<h2>⛽ محطة الوقود</h2>
-<p>نظام إدارة متكامل</p>
+<h3>⛽ محطة الوقود</h3>
 </div>
 
-<!-- شاشة -->
+<!-- المخزون -->
+<div class="stock">
+
+<div class="stock-card">
+⛽ البنزين: <span id="petrolStock">2000</span> لتر
+<button onclick="refill('petrol')">+</button>
+</div>
+
+<div class="stock-card">
+🟡 مازوت 1: <span id="diesel1Stock">1000</span> لتر
+<button onclick="refill('diesel1')">+</button>
+</div>
+
+<div class="stock-card">
+🟡 مازوت 2: <span id="diesel2Stock">1000</span> لتر
+<button onclick="refill('diesel2')">+</button>
+</div>
+
+</div>
+
+<!-- الشاشة -->
 <div class="display" id="display">0</div>
 
 <!-- المضخات -->
 <div class="pumps">
 
-<div class="pump" onclick="selectPump(this,1,'بنزين',58.97)">
-⛽<br>بنزين 1
-</div>
-
-<div class="pump" onclick="selectPump(this,2,'بنزين',58.97)">
-⛽<br>بنزين 2
-</div>
-
-<div class="pump" onclick="selectPump(this,3,'ديزل',56.35)">
-⛽<br>ديزل 1
-</div>
-
-<div class="pump" onclick="selectPump(this,4,'ديزل',56.35)">
-⛽<br>ديزل 2
-</div>
+<div class="pump" onclick="selectPump(this,1,'بنزين',58.97)">⛽ بنزين 1</div>
+<div class="pump" onclick="selectPump(this,2,'بنزين',58.97)">⛽ بنزين 2</div>
+<div class="pump" onclick="selectPump(this,3,'ديزل',56.35)">⛽ ديزل 1</div>
+<div class="pump" onclick="selectPump(this,4,'ديزل',56.35)">⛽ ديزل 2</div>
 
 </div>
 
-<!-- لوحة الأرقام -->
+<!-- الأرقام -->
 <div class="keypad">
 <button onclick="add(7)">7</button>
 <button onclick="add(8)">8</button>
@@ -178,29 +179,44 @@ body {
 <!-- الأزرار -->
 <div class="actions">
 <button class="btn green" onclick="startFuel()">ابدأ</button>
-<button class="btn gray" onclick="toggleBill()">📋 السجل</button>
+<button class="btn gray" onclick="showBill()">📋 السجل</button>
 <button class="btn red" onclick="cancel()">إلغاء</button>
 </div>
 
 </div>
 
-<!-- السجل -->
-<div id="billModal">
-<h3>السجل</h3>
-
-<div id="bill" style="flex:1;overflow:auto;background:#f1f5f9;padding:10px;border-radius:10px;"></div>
-<div id="total">المجموع: 0 أوقية</div>
-
-<button onclick="toggleBill()" class="btn red">إغلاق</button>
-</div>
-
 <script>
 
+/* المخزون */
+let petrol = 2000;
+let diesel1 = 1000;
+let diesel2 = 1000;
+
+/* النظام */
 let pump=null,input="",total=0,type="",price=0;
+
+function updateStock(){
+ document.getElementById("petrolStock").innerText=petrol;
+ document.getElementById("diesel1Stock").innerText=diesel1;
+ document.getElementById("diesel2Stock").innerText=diesel2;
+}
+
+function refill(type){
+ let amount=prompt("كم لتر تريد تعبئة؟");
+ amount=parseFloat(amount);
+ if(isNaN(amount)) return;
+
+ if(type==="petrol") petrol+=amount;
+ if(type==="diesel1") diesel1+=amount;
+ if(type==="diesel2") diesel2+=amount;
+
+ updateStock();
+}
 
 function selectPump(el,p,t,pr){
  document.querySelectorAll(".pump").forEach(x=>x.classList.remove("active"));
  el.classList.add("active");
+
  pump=p;type=t;price=pr;
 }
 
@@ -215,30 +231,45 @@ function clearInput(){
 }
 
 function startFuel(){
- if(!pump)return alert("اختر مضخة");
+ if(!pump) return alert("اختر مضخة");
 
  let liters=parseFloat(input||0);
+
+ if(type==="بنزين"){
+  if(liters>petrol) return alert("المخزون غير كافي");
+  petrol-=liters;
+ }
+
+ if(type==="ديزل"){
+  if(pump==3){
+    if(liters>diesel1) return alert("المخزون غير كافي");
+    diesel1-=liters;
+  }else{
+    if(liters>diesel2) return alert("المخزون غير كافي");
+    diesel2-=liters;
+  }
+ }
+
+ updateStock();
+
  let cost=liters*price;
  total+=cost;
 
- document.getElementById("bill").innerHTML+=
- `<p>${type} - ${liters} لتر = ${cost.toFixed(2)} أوقية</p>`;
-
- document.getElementById("total").innerText=
- "المجموع: "+total.toFixed(2)+" أوقية";
+ alert("تم الضخ: "+cost.toFixed(2)+" أوقية");
 
  input="";
  document.getElementById("display").innerText="0";
 }
 
-function toggleBill(){
- let modal=document.getElementById("billModal");
- modal.style.display=modal.style.display==="flex"?"none":"flex";
+function showBill(){
+ alert("المجموع: "+total.toFixed(2)+" أوقية");
 }
 
 function cancel(){
  location.reload();
 }
+
+updateStock();
 
 </script>
 
