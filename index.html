@@ -17,7 +17,6 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 .container{padding:15px}
 .card{background:#c9a24b;color:white;padding:20px;border-radius:20px;text-align:center}
 
-/* LOGIN */
 #loginBox{
  position:fixed;top:0;left:0;width:100%;height:100%;
  background:#000000cc;display:flex;justify-content:center;align-items:center;
@@ -25,17 +24,14 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 .login-card{background:white;padding:30px;border-radius:20px;width:300px;text-align:center}
 .login-card input{width:100%;padding:10px;margin:10px 0}
 
-/* pumps */
 .pumps{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}
 .pump{padding:60px;font-size:25px;border-radius:20px;text-align:center}
 .petrol{background:#22c55e;color:white}
 .diesel{background:#facc15}
 
-/* keypad */
 .keypad{display:none;grid-template-columns:repeat(3,1fr);gap:10px}
 .keypad button{padding:25px;font-size:25px;color:#000}
 
-/* admin */
 #adminBox{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#000000cc}
 .admin-card{background:white;margin:20px;padding:20px;border-radius:20px}
 </style>
@@ -88,25 +84,29 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 <div id="adminBox">
 <div class="admin-card">
 <h2>📊 لوحة المدير</h2>
-
 <canvas id="chart1"></canvas>
 <canvas id="chart2"></canvas>
-
 <button onclick="closeAdmin()">إغلاق</button>
 </div>
 </div>
 
 <script>
 
-/* Firebase */
-const firebaseConfig={
- apiKey:"AIzaSyA...",
- databaseURL:"https://pkka7-a75c0-default-rtdb.firebaseio.com"
+/* ✅ Firebase config (مصّحح بالكامل) */
+const firebaseConfig = {
+  apiKey: "AIzaSyA7pNxijt03_TzDDNnwFbqhyUU-zcbJiq4",
+  authDomain: "pkka7-a75c0.firebaseapp.com",
+  databaseURL: "https://pkka7-a75c0-default-rtdb.firebaseio.com",
+  projectId: "pkka7-a75c0",
+  storageBucket: "pkka7-a75c0.appspot.com",
+  messagingSenderId: "730135985362",
+  appId: "1:730135985362:web:8cf4bfd291e36e936d010b"
 };
+
 firebase.initializeApp(firebaseConfig);
 
-const db=firebase.database();
-const auth=firebase.auth();
+const db = firebase.database();
+const auth = firebase.auth();
 
 /* auth */
 let currentUser="";
