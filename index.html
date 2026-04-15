@@ -45,14 +45,13 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 .petrol{background:#22c55e;color:white}
 .diesel{background:#facc15}
 
-/* 🔥 KEYPAD BLACK */
+/* keypad */
 .keypad{
  display:none;
  grid-template-columns:repeat(3,1fr);
  gap:15px;
  margin-top:20px;
 }
-
 .keypad button{
  background:#eee;
  border:none;
@@ -61,31 +60,42 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
  font-size:28px;
  font-weight:bold;
  color:#000;
- box-shadow:0 5px 10px rgba(0,0,0,0.2);
- transition:0.2s;
 }
-
 .keypad button small{
- display:block;
- font-size:14px;
- margin-top:5px;
- letter-spacing:2px;
- color:#000;
+ display:block;font-size:14px;margin-top:5px;color:#000;
 }
-
-.keypad button:active{
- transform:scale(0.95);
- background:#d4d4d4;
-}
-
 .zero{grid-column:span 2;}
-.delete{background:#ddd;color:#000;}
+.delete{background:#ddd}
 
 /* actions */
 .actions{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:15px}
 .btn{padding:20px;font-size:20px;border:none;border-radius:15px}
 .green{background:#c9a24b;color:white}
 .red{background:#ef4444;color:white}
+
+/* 🧾 invoice */
+#invoiceBox{
+ display:none;
+ position:fixed;
+ top:0;left:0;width:100%;height:100%;
+ background:#000000cc;
+ justify-content:center;
+ align-items:center;
+}
+.invoice-card{
+ background:white;
+ padding:20px;
+ border-radius:20px;
+ width:300px;
+ text-align:center;
+}
+.invoice-card button{
+ margin-top:10px;
+ padding:10px;
+ width:100%;
+ border:none;
+ border-radius:10px;
+}
 </style>
 </head>
 
@@ -122,15 +132,12 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 <button onclick="add(1)">1</button>
 <button onclick="add(2)">2<small>ABC</small></button>
 <button onclick="add(3)">3<small>DEF</small></button>
-
 <button onclick="add(4)">4<small>GHI</small></button>
 <button onclick="add(5)">5<small>JKL</small></button>
 <button onclick="add(6)">6<small>MNO</small></button>
-
 <button onclick="add(7)">7<small>PQRS</small></button>
 <button onclick="add(8)">8<small>TUV</small></button>
 <button onclick="add(9)">9<small>WXYZ</small></button>
-
 <button class="zero" onclick="add(0)">0</button>
 <button class="delete" onclick="clearInput()">⌫</button>
 </div>
@@ -143,19 +150,29 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 
 </div>
 
+<!-- 🧾 invoice -->
+<div id="invoiceBox">
+<div class="invoice-card">
+<h3>🧾 فاتورة</h3>
+<div id="invText"></div>
+<button onclick="printInvoice()">🖨 طباعة</button>
+<button onclick="closeInvoice()">❌ إغلاق</button>
+</div>
+</div>
+
 <script>
 
 const firebaseConfig = {
- apiKey: "AIzaSyA7pNxijt03_TzDDNnwFbqhyUU-zcbJiq4",
- databaseURL: "https://pkka7-a75c0-default-rtdb.firebaseio.com"
+ apiKey:"AIzaSyA...",
+ databaseURL:"https://pkka7-a75c0-default-rtdb.firebaseio.com"
 };
 
 firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+const db=firebase.database();
 
 /* login */
 function login(){
- if(user.value==="admin" && pass.value==="1234"){
+ if(user.value==="admin"&&pass.value==="1234"){
   loginBox.style.display="none";
  }else alert("خطأ");
 }
@@ -163,15 +180,13 @@ function login(){
 let petrol=0,d1=0,d2=0,logs=[];
 let pump=null,input="",type="",price=0;
 
-/* init */
 db.ref("stock").once("value").then(s=>{
  if(!s.exists()){
   db.ref("stock").set({petrol:2000,d1:1000,d2:1000});
  }
 });
 
-/* load */
-db.ref("stock").on("value", s=>{
+db.ref("stock").on("value",s=>{
  let d=s.val();
  if(d){
   petrol=d.petrol;
@@ -183,34 +198,28 @@ db.ref("stock").on("value", s=>{
  }
 });
 
-db.ref("logs").on("value", s=>{
+db.ref("logs").on("value",s=>{
  logs=[];
  s.forEach(c=>logs.unshift(c.val()));
 });
 
-/* add stock */
 function addStock(t){
  let val=parseFloat(prompt("كم تريد إضافة؟"));
  if(!val)return;
-
  if(t==="petrol")petrol+=val;
  if(t==="d1")d1+=val;
  if(t==="d2")d2+=val;
-
  db.ref("stock").set({petrol,d1,d2});
 }
 
-/* pumps */
 function selectPump(p,t,pr){
  pump=p;type=t;price=pr;
  keypad.style.display="grid";
 }
 
-/* keypad */
 function add(n){input+=n;display.innerText=input;}
 function clearInput(){input="";display.innerText="0";}
 
-/* start */
 function startFuel(){
  let money=parseFloat(input||0);
  if(!money)return;
@@ -225,41 +234,39 @@ function startFuel(){
 
  db.ref("stock").set({petrol,d1,d2});
 
- db.ref("logs").push({
-  type:type,
-  pump:pump,
-  liters:liters,
-  amount:money
- });
+ db.ref("logs").push({type:type,pump:pump,liters:liters,amount:money});
 
- input="";
- display.innerText="0";
- keypad.style.display="none";
+ /* 🧾 invoice */
+ invText.innerHTML=`
+ نوع: ${type}<br>
+ المضخة: ${pump}<br>
+ المبلغ: ${money}<br>
+ اللترات: ${liters.toFixed(2)}<br>
+ السعر/لتر: ${price}
+ `;
+ invoiceBox.style.display="flex";
+
+ input="";display.innerText="0";keypad.style.display="none";
 }
 
-/* log */
+function printInvoice(){
+ let w=window.open("","","width=300,height=400");
+ w.document.write(`<h3>Fuel Pro</h3>`+invText.innerHTML);
+ w.print();
+}
+
+function closeInvoice(){
+ invoiceBox.style.display="none";
+}
+
 function openLog(){
- let total=0, diesel=0, petrolMoney=0;
-
- logs.forEach(l=>{
-  total+=l.amount;
-  if(l.type==="ديزل") diesel+=l.liters;
-  if(l.type==="بنزين") petrolMoney+=l.amount;
- });
-
- alert(`
-📊 التقرير
-
-💰 مجموع: ${total.toFixed(2)}
-⛽ ديزل: ${diesel.toFixed(2)}L
-🟢 بنزين: ${petrolMoney.toFixed(2)}
-`);
+ let total=0;
+ logs.forEach(l=>total+=l.amount);
+ alert("💰 مجموع: "+total);
 }
 
 function cancel(){
- input="";
- display.innerText="0";
- keypad.style.display="none";
+ input="";display.innerText="0";keypad.style.display="none";
 }
 
 </script>
