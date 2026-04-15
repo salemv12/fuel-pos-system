@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <title>Fuel Pro Ultimate</title>
 
+<!-- خط احترافي -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
@@ -12,6 +16,7 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 .container{padding:15px}
 .card{background:#c9a24b;color:white;padding:20px;border-radius:20px;text-align:center}
 
+/* LOGIN */
 #loginBox{
  position:fixed;top:0;left:0;width:100%;height:100%;
  background:#000000cc;display:flex;justify-content:center;align-items:center;
@@ -19,16 +24,38 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 .login-card{background:white;padding:30px;border-radius:20px;width:300px;text-align:center}
 .login-card input{width:100%;padding:10px;margin:10px 0}
 
+/* pumps */
 .pumps{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-top:10px}
 .pump{padding:50px;font-size:22px;border-radius:20px;text-align:center}
 .petrol{background:#22c55e;color:white}
 .diesel{background:#facc15}
 
+/* 🔥 شاشة العرض */
+#display{
+ background:#000;
+ color:#00ff88;
+ font-size:80px;
+ text-align:center;
+ padding:30px;
+ border-radius:25px;
+ margin:20px 0;
+ font-weight:bold;
+ letter-spacing:3px;
+ box-shadow:0 0 25px #00ff88;
+ min-height:100px;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ font-family:'Orbitron', sans-serif;
+}
+
+/* keypad */
 .keypad{display:none;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
 .keypad button{padding:25px;font-size:22px;color:#000}
 
 button{margin:5px;padding:10px;border:none;border-radius:10px}
 
+/* logs */
 #logsModal{
  display:none;position:fixed;top:0;left:0;width:100%;height:100%;
  background:#000000cc
@@ -58,9 +85,7 @@ button{margin:5px;padding:10px;border:none;border-radius:10px}
 
 <div id="stockBox"></div>
 
-<div id="display">0</div>
-
-<!-- 🔥 4 مضخات -->
+<!-- المضخات -->
 <div class="pumps">
 <div class="pump petrol" onclick="selectPump('petrol','بنزين 1',58.97)">⛽ بنزين 1</div>
 <div class="pump petrol" onclick="selectPump('petrol','بنزين 2',58.97)">⛽ بنزين 2</div>
@@ -68,6 +93,10 @@ button{margin:5px;padding:10px;border:none;border-radius:10px}
 <div class="pump diesel" onclick="selectPump('diesel2','ديزل 2',56.35)">🟡 ديزل 2</div>
 </div>
 
+<!-- 🔥 شاشة العرض الكبيرة -->
+<div id="display">0</div>
+
+<!-- الأرقام -->
 <div class="keypad" id="keypad">
 <button onclick="add(1)">1</button>
 <button onclick="add(2)">2</button>
@@ -137,7 +166,7 @@ function login(){
  });
 }
 
-/* 🔥 المخزون */
+/* المخزون */
 let stock={
  petrol:1000,
  diesel1:1000,
@@ -176,7 +205,7 @@ function clearInput(){
  display.innerText="0";
 }
 
-/* 🔥 تسجيل عملية */
+/* تشغيل */
 function startFuel(){
 
  let money=parseFloat(input||0);
