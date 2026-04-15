@@ -8,9 +8,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-<!-- Charts -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <style>
 body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 .container{padding:15px}
@@ -23,16 +20,23 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 .login-card{background:white;padding:30px;border-radius:20px;width:300px;text-align:center}
 .login-card input{width:100%;padding:10px;margin:10px 0}
 
-.pumps{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}
-.pump{padding:60px;font-size:25px;border-radius:20px;text-align:center}
+.pumps{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-top:10px}
+.pump{padding:50px;font-size:22px;border-radius:20px;text-align:center}
 .petrol{background:#22c55e;color:white}
 .diesel{background:#facc15}
 
-.keypad{display:none;grid-template-columns:repeat(3,1fr);gap:10px}
-.keypad button{padding:25px;font-size:25px;color:#000}
+.keypad{display:none;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.keypad button{padding:25px;font-size:22px;color:#000}
 
-#adminBox{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#000000cc}
-.admin-card{background:white;margin:20px;padding:20px;border-radius:20px}
+button{margin:5px;padding:10px 15px;border:none;border-radius:10px}
+
+#logsModal{
+ display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+ background:#000000cc
+}
+.modal{
+ background:white;margin:20px;padding:20px;border-radius:20px
+}
 </style>
 </head>
 
@@ -42,13 +46,10 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 <div id="loginBox">
 <div class="login-card">
 <h2>🔐 تسجيل الدخول</h2>
-
 <input id="username" placeholder="اسم المستخدم">
 <input id="password" type="password" placeholder="كلمة المرور">
-
 <button onclick="login()">دخول</button>
 <button onclick="register()">إنشاء حساب</button>
-
 </div>
 </div>
 
@@ -56,11 +57,13 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 
 <div class="card">⛽ Fuel Pro Ultimate</div>
 
+<div id="stockBox"></div>
+
 <div id="display">0</div>
 
 <div class="pumps">
-<div class="pump petrol" onclick="selectPump(1,'بنزين',58.97)">⛽ بنزين</div>
-<div class="pump diesel" onclick="selectPump(2,'ديزل',56.35)">⛽ ديزل</div>
+<div class="pump petrol" onclick="selectPump('بنزين',58.97)">⛽ بنزين</div>
+<div class="pump diesel" onclick="selectPump('ديزل',56.35)">⛽ ديزل</div>
 </div>
 
 <div class="keypad" id="keypad">
@@ -78,17 +81,16 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 </div>
 
 <button onclick="startFuel()">ابدأ</button>
-<button onclick="openAdmin()">🧑‍💼 المدير</button>
+<button onclick="showLogs()">📄 السجل</button>
 
 </div>
 
-<!-- ADMIN -->
-<div id="adminBox">
-<div class="admin-card">
-<h2>📊 لوحة المدير</h2>
-<canvas id="chart1"></canvas>
-<canvas id="chart2"></canvas>
-<button onclick="closeAdmin()">إغلاق</button>
+<!-- السجل -->
+<div id="logsModal">
+<div class="modal">
+<h3>📊 السجل</h3>
+<div id="logsBox"></div>
+<button onclick="closeLogs()">إغلاق</button>
 </div>
 </div>
 
@@ -97,123 +99,114 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 /* Firebase */
 const firebaseConfig = {
   apiKey: "AIzaSyA7pNxijt03_TzDDNnwFbqhyUU-zcbJiq4",
-  authDomain: "pkka7-a75c0.firebaseapp.com",
-  databaseURL: "https://pkka7-a75c0-default-rtdb.firebaseio.com",
-  projectId: "pkka7-a75c0",
-  storageBucket: "pkka7-a75c0.appspot.com",
-  messagingSenderId: "730135985362",
-  appId: "1:730135985362:web:8cf4bfd291e36e936d010b"
+  databaseURL: "https://pkka7-a75c0-default-rtdb.firebaseio.com"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-/* user */
+/* المستخدم */
 let currentUser = "";
 
-/* register */
+/* تسجيل */
 function register(){
  let user = username.value;
  let pass = password.value;
 
  if(!user || !pass) return alert("ادخل البيانات");
 
- db.ref("users/" + user).once("value").then(s=>{
-  if(s.exists()){
-   alert("المستخدم موجود");
-  }else{
-   db.ref("users/" + user).set({
-    password: pass
-   });
-   alert("تم إنشاء الحساب");
-  }
- });
+ db.ref("users/"+user).set({password:pass});
+ alert("تم إنشاء الحساب");
 }
 
-/* login */
+/* دخول */
 function login(){
  let user = username.value;
  let pass = password.value;
 
- if(!user || !pass) return alert("ادخل البيانات");
+ db.ref("users/"+user).once("value").then(s=>{
+  if(!s.exists()) return alert("المستخدم غير موجود");
 
- db.ref("users/" + user).once("value").then(s=>{
-  if(!s.exists()){
-   alert("المستخدم غير موجود");
+  if(s.val().password === pass){
+   currentUser=user;
+   loginBox.style.display="none";
   }else{
-   if(s.val().password === pass){
-    currentUser = user;
-    loginBox.style.display="none";
-   }else{
-    alert("كلمة المرور خطأ");
-   }
+   alert("كلمة المرور خطأ");
   }
  });
 }
 
-/* data */
-let logs=[];
-let pump,type,price,input="";
+/* المخزون */
+let stock={petrol:1000,diesel:1000};
 
-/* load logs */
-db.ref("logs").on("value",s=>{
- logs=[];
- s.forEach(c=>logs.unshift(c.val()));
+db.ref("stock").on("value",s=>{
+ if(s.exists()) stock=s.val();
+ updateStock();
 });
 
-/* keypad */
-function selectPump(p,t,pr){
- pump=p;type=t;price=pr;
+function updateStock(){
+ stockBox.innerHTML = `بنزين: ${stock.petrol} | ديزل: ${stock.diesel}`;
+}
+
+/* إدخال */
+let type="",price=0,input="";
+
+function selectPump(t,p){
+ type=t;
+ price=p;
  keypad.style.display="grid";
 }
-function add(n){input+=n;display.innerText=input;}
-function clearInput(){input="";display.innerText="0";}
 
-/* start */
+function add(n){
+ input+=n;
+ display.innerText=input;
+}
+
+function clearInput(){
+ input="";
+ display.innerText="0";
+}
+
+/* تسجيل عملية */
 function startFuel(){
+
  let money=parseFloat(input||0);
- if(!money)return;
+ if(!money) return;
+
+ let liters=money/price;
+
+ if(type=="بنزين") stock.petrol-=liters;
+ if(type=="ديزل") stock.diesel-=liters;
+
+ db.ref("stock").set(stock);
 
  db.ref("logs").push({
   type:type,
   amount:money,
-  user:currentUser
+  liters:liters,
+  user:currentUser,
+  time:new Date().toLocaleString()
  });
 
- input="";display.innerText="0";keypad.style.display="none";
+ input="";
+ display.innerText="0";
+ keypad.style.display="none";
 }
 
-/* admin */
-function openAdmin(){
-
- let total=0;
- let users={};
-
- logs.forEach(l=>{
-  total+=l.amount;
-
-  if(!users[l.user]) users[l.user]=0;
-  users[l.user]+=l.amount;
+/* السجل */
+function showLogs(){
+ db.ref("logs").once("value").then(s=>{
+  let html="";
+  s.forEach(c=>{
+   let d=c.val();
+   html+=`<div>${d.type} - ${d.amount} MRU - ${d.user}</div>`;
+  });
+  logsBox.innerHTML=html;
  });
-
- let labels=Object.keys(users);
- let data=Object.values(users);
-
- new Chart(chart1,{
-  type:'bar',
-  data:{labels:labels,datasets:[{data:data}]}
- });
-
- new Chart(chart2,{
-  type:'pie',
-  data:{labels:labels,datasets:[{data:data}]}
- });
-
- adminBox.style.display="block";
+ logsModal.style.display="block";
 }
 
-function closeAdmin(){
- adminBox.style.display="none";
+function closeLogs(){
+ logsModal.style.display="none";
 }
 
 </script>
