@@ -7,7 +7,6 @@
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
 <!-- Charts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -43,10 +42,13 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 <div id="loginBox">
 <div class="login-card">
 <h2>🔐 تسجيل الدخول</h2>
-<input id="email" placeholder="email">
-<input id="password" type="password" placeholder="password">
+
+<input id="username" placeholder="اسم المستخدم">
+<input id="password" type="password" placeholder="كلمة المرور">
+
 <button onclick="login()">دخول</button>
 <button onclick="register()">إنشاء حساب</button>
+
 </div>
 </div>
 
@@ -92,7 +94,7 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 
 <script>
 
-/* ✅ Firebase config (مصّحح بالكامل) */
+/* Firebase */
 const firebaseConfig = {
   apiKey: "AIzaSyA7pNxijt03_TzDDNnwFbqhyUU-zcbJiq4",
   authDomain: "pkka7-a75c0.firebaseapp.com",
@@ -104,34 +106,50 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-
 const db = firebase.database();
-const auth = firebase.auth();
 
-/* auth */
-let currentUser="";
+/* user */
+let currentUser = "";
 
-function login(){
- auth.signInWithEmailAndPassword(email.value,password.value)
- .then(u=>{
-  currentUser=u.user.email;
-  loginBox.style.display="none";
- })
- .catch(e=>alert(e.message));
-}
-
+/* register */
 function register(){
- auth.createUserWithEmailAndPassword(email.value,password.value)
- .then(()=>alert("تم إنشاء الحساب"))
- .catch(e=>alert(e.message));
+ let user = username.value;
+ let pass = password.value;
+
+ if(!user || !pass) return alert("ادخل البيانات");
+
+ db.ref("users/" + user).once("value").then(s=>{
+  if(s.exists()){
+   alert("المستخدم موجود");
+  }else{
+   db.ref("users/" + user).set({
+    password: pass
+   });
+   alert("تم إنشاء الحساب");
+  }
+ });
 }
 
-auth.onAuthStateChanged(user=>{
- if(user){
-  currentUser=user.email;
-  loginBox.style.display="none";
- }
-});
+/* login */
+function login(){
+ let user = username.value;
+ let pass = password.value;
+
+ if(!user || !pass) return alert("ادخل البيانات");
+
+ db.ref("users/" + user).once("value").then(s=>{
+  if(!s.exists()){
+   alert("المستخدم غير موجود");
+  }else{
+   if(s.val().password === pass){
+    currentUser = user;
+    loginBox.style.display="none";
+   }else{
+    alert("كلمة المرور خطأ");
+   }
+  }
+ });
+}
 
 /* data */
 let logs=[];
@@ -165,7 +183,7 @@ function startFuel(){
  input="";display.innerText="0";keypad.style.display="none";
 }
 
-/* admin + charts */
+/* admin */
 function openAdmin(){
 
  let total=0;
