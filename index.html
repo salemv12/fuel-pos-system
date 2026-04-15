@@ -4,10 +4,8 @@
 <meta charset="UTF-8">
 <title>Fuel Pro Ultimate</title>
 
-<!-- خط احترافي -->
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
@@ -30,7 +28,7 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 .petrol{background:#22c55e;color:white}
 .diesel{background:#facc15}
 
-/* 🔥 شاشة العرض */
+/* display */
 #display{
  background:#000;
  color:#00ff88;
@@ -42,7 +40,6 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
  font-weight:bold;
  letter-spacing:3px;
  box-shadow:0 0 25px #00ff88;
- min-height:100px;
  display:flex;
  align-items:center;
  justify-content:center;
@@ -51,17 +48,50 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 
 /* keypad */
 .keypad{display:none;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
-.keypad button{padding:25px;font-size:22px;color:#000}
+.keypad button{padding:25px;font-size:22px}
 
-button{margin:5px;padding:10px;border:none;border-radius:10px}
+/* 🔥 buttons */
+.actions{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:15px;
+ margin-top:15px;
+}
+
+.big-btn{
+ font-size:24px;
+ padding:20px;
+ border:none;
+ border-radius:20px;
+ font-weight:bold;
+}
+
+.start{background:#22c55e;color:white}
+.logs{background:#3b82f6;color:white}
 
 /* logs */
 #logsModal{
- display:none;position:fixed;top:0;left:0;width:100%;height:100%;
- background:#000000cc
+ display:none;
+ position:fixed;
+ top:0;left:0;width:100%;height:100%;
+ background:#000000cc;
 }
 .modal{
- background:white;margin:20px;padding:20px;border-radius:20px
+ background:white;
+ margin:20px;
+ padding:20px;
+ border-radius:20px;
+}
+
+.close-btn{
+ width:100%;
+ margin-top:20px;
+ padding:15px;
+ font-size:20px;
+ background:#ef4444;
+ color:white;
+ border:none;
+ border-radius:15px;
 }
 </style>
 </head>
@@ -85,7 +115,7 @@ button{margin:5px;padding:10px;border:none;border-radius:10px}
 
 <div id="stockBox"></div>
 
-<!-- المضخات -->
+<!-- pumps -->
 <div class="pumps">
 <div class="pump petrol" onclick="selectPump('petrol','بنزين 1',58.97)">⛽ بنزين 1</div>
 <div class="pump petrol" onclick="selectPump('petrol','بنزين 2',58.97)">⛽ بنزين 2</div>
@@ -93,10 +123,10 @@ button{margin:5px;padding:10px;border:none;border-radius:10px}
 <div class="pump diesel" onclick="selectPump('diesel2','ديزل 2',56.35)">🟡 ديزل 2</div>
 </div>
 
-<!-- 🔥 شاشة العرض الكبيرة -->
+<!-- display -->
 <div id="display">0</div>
 
-<!-- الأرقام -->
+<!-- keypad -->
 <div class="keypad" id="keypad">
 <button onclick="add(1)">1</button>
 <button onclick="add(2)">2</button>
@@ -111,105 +141,72 @@ button{margin:5px;padding:10px;border:none;border-radius:10px}
 <button onclick="clearInput()">⌫</button>
 </div>
 
-<button onclick="startFuel()">ابدأ</button>
-<button onclick="showLogs()">📄 السجل</button>
+<!-- 🔥 buttons -->
+<div class="actions">
+<button class="big-btn start" onclick="startFuel()">⛽ ابدأ</button>
+<button class="big-btn logs" onclick="showLogs()">📄 السجل</button>
+</div>
 
 </div>
 
-<!-- السجل -->
+<!-- logs -->
 <div id="logsModal">
 <div class="modal">
-<h3>📊 السجل</h3>
+<h3 style="text-align:center;font-size:28px">📊 السجل</h3>
 <div id="logsBox"></div>
-<button onclick="closeLogs()">إغلاق</button>
+<button class="close-btn" onclick="closeLogs()">❌ إغلاق</button>
 </div>
 </div>
 
 <script>
 
-/* Firebase */
 const firebaseConfig = {
- apiKey: "AIzaSyA7pNxijt03_TzDDNnwFbqhyUU-zcbJiq4",
- databaseURL: "https://pkka7-a75c0-default-rtdb.firebaseio.com"
+ apiKey:"AIzaSyA7pNxijt03_TzDDNnwFbqhyUU-zcbJiq4",
+ databaseURL:"https://pkka7-a75c0-default-rtdb.firebaseio.com"
 };
 firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+const db=firebase.database();
 
-/* المستخدم */
-let currentUser = "";
+let currentUser="";
 
-/* تسجيل */
+/* login */
 function register(){
- let user=username.value;
- let pass=password.value;
-
- if(!user || !pass) return alert("ادخل البيانات");
-
- db.ref("users/"+user).set({password:pass});
- alert("تم إنشاء الحساب");
+ db.ref("users/"+username.value).set({password:password.value});
+ alert("تم");
 }
 
-/* دخول */
 function login(){
- let user=username.value;
- let pass=password.value;
-
- db.ref("users/"+user).once("value").then(s=>{
-  if(!s.exists()) return alert("المستخدم غير موجود");
-
-  if(s.val().password===pass){
-   currentUser=user;
+ db.ref("users/"+username.value).once("value").then(s=>{
+  if(s.val() && s.val().password===password.value){
+   currentUser=username.value;
    loginBox.style.display="none";
-  }else{
-   alert("كلمة المرور خطأ");
-  }
+  }else alert("خطأ");
  });
 }
 
-/* المخزون */
-let stock={
- petrol:1000,
- diesel1:1000,
- diesel2:1000
-};
+/* stock */
+let stock={petrol:1000,diesel1:1000,diesel2:1000};
 
 db.ref("stock").on("value",s=>{
  if(s.exists()) stock=s.val();
- updateStock();
+ stockBox.innerHTML=`⛽ ${stock.petrol} | 🟡 ${stock.diesel1} | 🟡 ${stock.diesel2}`;
 });
 
-function updateStock(){
- stockBox.innerHTML=
- `⛽ بنزين: ${stock.petrol || 0} |
- 🟡 ديزل1: ${stock.diesel1 || 0} |
- 🟡 ديزل2: ${stock.diesel2 || 0}`;
-}
-
-/* الإدخال */
+/* input */
 let type="",pumpName="",price=0,input="";
 
 function selectPump(t,name,p){
- type=t;
- pumpName=name;
- price=p;
+ type=t;pumpName=name;price=p;
  keypad.style.display="grid";
 }
 
-function add(n){
- input+=n;
- display.innerText=input;
-}
+function add(n){input+=n;display.innerText=input;}
+function clearInput(){input="";display.innerText="0";}
 
-function clearInput(){
- input="";
- display.innerText="0";
-}
-
-/* تشغيل */
+/* start */
 function startFuel(){
-
  let money=parseFloat(input||0);
- if(!money) return;
+ if(!money)return;
 
  let liters=money/price;
 
@@ -222,23 +219,19 @@ function startFuel(){
  db.ref("logs").push({
   type:pumpName,
   amount:money,
-  liters:liters,
-  user:currentUser,
-  time:new Date().toLocaleString()
+  user:currentUser
  });
 
- input="";
- display.innerText="0";
- keypad.style.display="none";
+ input="";display.innerText="0";keypad.style.display="none";
 }
 
-/* السجل */
+/* logs */
 function showLogs(){
  db.ref("logs").once("value").then(s=>{
   let html="";
   s.forEach(c=>{
    let d=c.val();
-   html+=`<div>${d.type} - ${d.amount} MRU - ${d.user}</div>`;
+   html+=`<div>${d.type} - ${d.amount} - ${d.user}</div>`;
   });
   logsBox.innerHTML=html;
  });
