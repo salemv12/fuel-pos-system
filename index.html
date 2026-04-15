@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Fuel Pro Ultimate</title>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
@@ -28,7 +27,7 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 .keypad{display:none;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
 .keypad button{padding:25px;font-size:22px;color:#000}
 
-button{margin:5px;padding:10px 15px;border:none;border-radius:10px}
+button{margin:5px;padding:10px;border:none;border-radius:10px}
 
 #logsModal{
  display:none;position:fixed;top:0;left:0;width:100%;height:100%;
@@ -61,9 +60,12 @@ button{margin:5px;padding:10px 15px;border:none;border-radius:10px}
 
 <div id="display">0</div>
 
+<!-- 🔥 4 مضخات -->
 <div class="pumps">
-<div class="pump petrol" onclick="selectPump('بنزين',58.97)">⛽ بنزين</div>
-<div class="pump diesel" onclick="selectPump('ديزل',56.35)">⛽ ديزل</div>
+<div class="pump petrol" onclick="selectPump('petrol','بنزين 1',58.97)">⛽ بنزين 1</div>
+<div class="pump petrol" onclick="selectPump('petrol','بنزين 2',58.97)">⛽ بنزين 2</div>
+<div class="pump diesel" onclick="selectPump('diesel1','ديزل 1',56.35)">🟡 ديزل 1</div>
+<div class="pump diesel" onclick="selectPump('diesel2','ديزل 2',56.35)">🟡 ديزل 2</div>
 </div>
 
 <div class="keypad" id="keypad">
@@ -98,8 +100,8 @@ button{margin:5px;padding:10px 15px;border:none;border-radius:10px}
 
 /* Firebase */
 const firebaseConfig = {
-  apiKey: "AIzaSyA7pNxijt03_TzDDNnwFbqhyUU-zcbJiq4",
-  databaseURL: "https://pkka7-a75c0-default-rtdb.firebaseio.com"
+ apiKey: "AIzaSyA7pNxijt03_TzDDNnwFbqhyUU-zcbJiq4",
+ databaseURL: "https://pkka7-a75c0-default-rtdb.firebaseio.com"
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
@@ -109,8 +111,8 @@ let currentUser = "";
 
 /* تسجيل */
 function register(){
- let user = username.value;
- let pass = password.value;
+ let user=username.value;
+ let pass=password.value;
 
  if(!user || !pass) return alert("ادخل البيانات");
 
@@ -120,13 +122,13 @@ function register(){
 
 /* دخول */
 function login(){
- let user = username.value;
- let pass = password.value;
+ let user=username.value;
+ let pass=password.value;
 
  db.ref("users/"+user).once("value").then(s=>{
   if(!s.exists()) return alert("المستخدم غير موجود");
 
-  if(s.val().password === pass){
+  if(s.val().password===pass){
    currentUser=user;
    loginBox.style.display="none";
   }else{
@@ -135,8 +137,12 @@ function login(){
  });
 }
 
-/* المخزون */
-let stock={petrol:1000,diesel:1000};
+/* 🔥 المخزون */
+let stock={
+ petrol:1000,
+ diesel1:1000,
+ diesel2:1000
+};
 
 db.ref("stock").on("value",s=>{
  if(s.exists()) stock=s.val();
@@ -144,14 +150,18 @@ db.ref("stock").on("value",s=>{
 });
 
 function updateStock(){
- stockBox.innerHTML = `بنزين: ${stock.petrol} | ديزل: ${stock.diesel}`;
+ stockBox.innerHTML=
+ `⛽ بنزين: ${stock.petrol || 0} |
+ 🟡 ديزل1: ${stock.diesel1 || 0} |
+ 🟡 ديزل2: ${stock.diesel2 || 0}`;
 }
 
-/* إدخال */
-let type="",price=0,input="";
+/* الإدخال */
+let type="",pumpName="",price=0,input="";
 
-function selectPump(t,p){
+function selectPump(t,name,p){
  type=t;
+ pumpName=name;
  price=p;
  keypad.style.display="grid";
 }
@@ -166,7 +176,7 @@ function clearInput(){
  display.innerText="0";
 }
 
-/* تسجيل عملية */
+/* 🔥 تسجيل عملية */
 function startFuel(){
 
  let money=parseFloat(input||0);
@@ -174,13 +184,14 @@ function startFuel(){
 
  let liters=money/price;
 
- if(type=="بنزين") stock.petrol-=liters;
- if(type=="ديزل") stock.diesel-=liters;
+ if(type=="petrol") stock.petrol-=liters;
+ if(type=="diesel1") stock.diesel1-=liters;
+ if(type=="diesel2") stock.diesel2-=liters;
 
  db.ref("stock").set(stock);
 
  db.ref("logs").push({
-  type:type,
+  type:pumpName,
   amount:money,
   liters:liters,
   user:currentUser,
