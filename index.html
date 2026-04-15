@@ -2,7 +2,7 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>pekka7</title>
+<title>Fuel Pro Cloud</title>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -45,9 +45,33 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 .petrol{background:#22c55e;color:white}
 .diesel{background:#facc15}
 
-/* keypad */
-.keypad{display:none;grid-template-columns:repeat(3,1fr);gap:15px}
-.keypad button{padding:25px;font-size:22px;border-radius:15px}
+/* 🔥 PHONE KEYPAD */
+.keypad{
+ display:none;
+ grid-template-columns:repeat(3,1fr);
+ gap:15px;
+ margin-top:20px;
+}
+
+.keypad button{
+ background:#eee;
+ border:none;
+ border-radius:20px;
+ padding:30px;
+ font-size:28px;
+ font-weight:bold;
+ box-shadow:0 5px 10px rgba(0,0,0,0.2);
+}
+
+.keypad button small{
+ display:block;
+ font-size:14px;
+ margin-top:5px;
+ letter-spacing:2px;
+}
+
+.zero{grid-column:span 2;}
+.delete{background:#ddd;}
 
 /* actions */
 .actions{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:15px}
@@ -86,11 +110,22 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 <div class="pump diesel" onclick="selectPump(4,'ديزل',56.35)">⛽ ديزل 2</div>
 </div>
 
+<!-- 🔥 KEYPAD -->
 <div class="keypad" id="keypad">
-<button onclick="add(7)">7</button><button onclick="add(8)">8</button><button onclick="add(9)">9</button>
-<button onclick="add(4)">4</button><button onclick="add(5)">5</button><button onclick="add(6)">6</button>
-<button onclick="add(1)">1</button><button onclick="add(2)">2</button><button onclick="add(3)">3</button>
-<button onclick="add(0)">0</button><button onclick="clearInput()">مسح</button>
+<button onclick="add(1)">1</button>
+<button onclick="add(2)">2<small>ABC</small></button>
+<button onclick="add(3)">3<small>DEF</small></button>
+
+<button onclick="add(4)">4<small>GHI</small></button>
+<button onclick="add(5)">5<small>JKL</small></button>
+<button onclick="add(6)">6<small>MNO</small></button>
+
+<button onclick="add(7)">7<small>PQRS</small></button>
+<button onclick="add(8)">8<small>TUV</small></button>
+<button onclick="add(9)">9<small>WXYZ</small></button>
+
+<button class="zero" onclick="add(0)">0</button>
+<button class="delete" onclick="clearInput()">⌫</button>
 </div>
 
 <div class="actions">
@@ -103,12 +138,9 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 
 <script>
 
-/* Firebase */
 const firebaseConfig = {
  apiKey: "AIzaSyA7pNxijt03_TzDDNnwFbqhyUU-zcbJiq4",
- authDomain: "pkka7-a75c0.firebaseapp.com",
- databaseURL: "https://pkka7-a75c0-default-rtdb.firebaseio.com",
- projectId: "pkka7-a75c0"
+ databaseURL: "https://pkka7-a75c0-default-rtdb.firebaseio.com"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -121,7 +153,6 @@ function login(){
  }else alert("خطأ");
 }
 
-/* data */
 let petrol=0,d1=0,d2=0,logs=[];
 let pump=null,input="",type="",price=0;
 
@@ -168,23 +199,21 @@ function selectPump(p,t,pr){
  keypad.style.display="grid";
 }
 
+/* keypad */
 function add(n){input+=n;display.innerText=input;}
 function clearInput(){input="";display.innerText="0";}
 
-/* 🔥 MONEY MODE */
+/* start */
 function startFuel(){
-
  let money=parseFloat(input||0);
- if(!money)return alert("ادخل المبلغ");
+ if(!money)return;
 
  let liters=money/price;
 
- if(type==="بنزين"){
-  if(liters>petrol)return alert("المخزون غير كافي");
-  petrol-=liters;
- }else{
-  if(pump==3){if(liters>d1)return alert("المخزون غير كافي"); d1-=liters;}
-  else{if(liters>d2)return alert("المخزون غير كافي"); d2-=liters;}
+ if(type==="بنزين"){if(liters>petrol)return;petrol-=liters;}
+ else{
+  if(pump==3){if(liters>d1)return;d1-=liters;}
+  else{if(liters>d2)return;d2-=liters;}
  }
 
  db.ref("stock").set({petrol,d1,d2});
@@ -201,36 +230,13 @@ function startFuel(){
  keypad.style.display="none";
 }
 
-/* 🔥 ADVANCED LOG */
+/* log */
 function openLog(){
-
- let total=0;
- let dieselLiters=0;
- let petrolMoney=0;
-
- let details="";
-
+ let txt="";
  logs.forEach(l=>{
-  total+=l.amount;
-
-  if(l.type==="ديزل") dieselLiters+=l.liters;
-  if(l.type==="بنزين") petrolMoney+=l.amount;
-
-  details+=`${l.type} - ${l.amount} MRU - ${l.liters.toFixed(2)}L\n`;
+  txt+=`${l.type} - ${l.amount} MRU\n`;
  });
-
- alert(`
-📊 التقرير
-
-💰 مجموع المبيعات: ${total.toFixed(2)}
-
-⛽ لترات المازوت: ${dieselLiters.toFixed(2)}
-
-🟢 مبيعات البنزين: ${petrolMoney.toFixed(2)}
-
-----------------
-${details}
-`);
+ alert(txt||"لا يوجد سجل");
 }
 
 function cancel(){
