@@ -68,7 +68,7 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 .delete{background:#ddd}
 
 /* actions */
-.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:15px}
+.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-top:15px}
 .btn{padding:20px;font-size:20px;border:none;border-radius:15px}
 .green{background:#c9a24b;color:white}
 .red{background:#ef4444;color:white}
@@ -89,12 +89,20 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
  width:300px;
  text-align:center;
 }
-.invoice-card button{
- margin-top:10px;
- padding:10px;
- width:100%;
- border:none;
- border-radius:10px;
+
+/* 🧑‍💼 admin */
+#adminBox{
+ display:none;
+ position:fixed;
+ top:0;left:0;width:100%;height:100%;
+ background:#000000cc;
+ overflow:auto;
+}
+.admin-card{
+ background:white;
+ margin:20px;
+ padding:20px;
+ border-radius:20px;
 }
 </style>
 </head>
@@ -145,6 +153,7 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 <div class="actions">
 <button class="btn green" onclick="startFuel()">ابدأ</button>
 <button class="btn" onclick="openLog()">📋 التقرير</button>
+<button class="btn" onclick="openAdmin()">🧑‍💼 المدير</button>
 <button class="btn red" onclick="cancel()">إلغاء</button>
 </div>
 
@@ -160,39 +169,52 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 </div>
 </div>
 
+<!-- 🧑‍💼 admin -->
+<div id="adminBox">
+<div class="admin-card">
+
+<h2>📊 لوحة المدير</h2>
+
+<div id="adminStats"></div>
+
+<h3>👤 المستخدمين</h3>
+<div id="adminUsers"></div>
+
+<h3>📋 آخر العمليات</h3>
+<div id="adminLogs"></div>
+
+<button onclick="closeAdmin()">❌ إغلاق</button>
+
+</div>
+</div>
+
 <script>
 
-/* Firebase */
-const firebaseConfig = {
+const firebaseConfig={
  apiKey:"AIzaSyA...",
  databaseURL:"https://pkka7-a75c0-default-rtdb.firebaseio.com"
 };
 firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
 
-/* 👤 المستخدم */
 let currentUser="";
 
-/* login */
 function login(){
- if(!user.value || !pass.value) return alert("ادخل البيانات");
+ if(!user.value)return;
  currentUser=user.value;
  loginBox.style.display="none";
 }
 
-/* data */
 let petrol=0,d1=0,d2=0,logs=[];
 let pump=null,input="",type="",price=0;
 
-/* init */
 db.ref("stock").once("value").then(s=>{
  if(!s.exists()){
   db.ref("stock").set({petrol:2000,d1:1000,d2:1000});
  }
 });
 
-/* load */
-db.ref("stock").on("value", s=>{
+db.ref("stock").on("value",s=>{
  let d=s.val();
  if(d){
   petrol=d.petrol;
@@ -204,22 +226,20 @@ db.ref("stock").on("value", s=>{
  }
 });
 
-db.ref("logs").on("value", s=>{
+db.ref("logs").on("value",s=>{
  logs=[];
  s.forEach(c=>logs.unshift(c.val()));
 });
 
-/* add stock */
 function addStock(t){
- let val=parseFloat(prompt("كم تريد إضافة؟"));
- if(!val)return;
- if(t==="petrol")petrol+=val;
- if(t==="d1")d1+=val;
- if(t==="d2")d2+=val;
+ let v=parseFloat(prompt("كم تريد إضافة؟"));
+ if(!v)return;
+ if(t==="petrol")petrol+=v;
+ if(t==="d1")d1+=v;
+ if(t==="d2")d2+=v;
  db.ref("stock").set({petrol,d1,d2});
 }
 
-/* pumps */
 function selectPump(p,t,pr){
  pump=p;type=t;price=pr;
  keypad.style.display="grid";
@@ -228,7 +248,6 @@ function selectPump(p,t,pr){
 function add(n){input+=n;display.innerText=input;}
 function clearInput(){input="";display.innerText="0";}
 
-/* start */
 function startFuel(){
  let money=parseFloat(input||0);
  if(!money)return;
@@ -248,60 +267,54 @@ function startFuel(){
   pump:pump,
   liters:liters,
   amount:money,
-  user:currentUser,
-  date:new Date().toLocaleDateString()
+  user:currentUser
  });
 
- invText.innerHTML=`
- 👤 ${currentUser}<br>
- نوع: ${type}<br>
- مضخة: ${pump}<br>
- مبلغ: ${money}<br>
- لترات: ${liters.toFixed(2)}
- `;
+ invText.innerHTML=`${currentUser}<br>${type}<br>${money}`;
  invoiceBox.style.display="flex";
 
  input="";display.innerText="0";keypad.style.display="none";
 }
 
-/* التقرير */
+/* 📊 التقرير */
 function openLog(){
+ let total=0;
+ logs.forEach(l=>total+=l.amount);
+ alert("💰 "+total);
+}
 
- let today=new Date().toLocaleDateString();
+/* 🧑‍💼 admin */
+function openAdmin(){
 
- let total=0,count=0,diesel=0,petrolMoney=0,users={};
+ let total=0,diesel=0,petrolMoney=0,users={},last="";
 
- logs.forEach(l=>{
-  if(l.date===today){
-   total+=l.amount;
-   count++;
-
-   if(l.type==="ديزل") diesel+=l.liters;
-   if(l.type==="بنزين") petrolMoney+=l.amount;
-
-   if(!users[l.user]) users[l.user]=0;
-   users[l.user]+=l.amount;
-  }
+ logs.slice(0,10).forEach(l=>{
+  last+=`${l.user} - ${l.amount}<br>`;
  });
 
- let txt="";
+ logs.forEach(l=>{
+  total+=l.amount;
+
+  if(l.type==="ديزل") diesel+=l.liters;
+  if(l.type==="بنزين") petrolMoney+=l.amount;
+
+  if(!users[l.user]) users[l.user]=0;
+  users[l.user]+=l.amount;
+ });
+
+ let uHTML="";
  for(let u in users){
-  txt+=`${u}: ${users[u].toFixed(2)}\n`;
+  uHTML+=`${u}: ${users[u].toFixed(2)}<br>`;
  }
 
- alert(`
-📊 تقرير اليوم
+ adminStats.innerHTML=`💰 ${total}<br>⛽ ${diesel}<br>🟢 ${petrolMoney}`;
+ adminUsers.innerHTML=uHTML;
+ adminLogs.innerHTML=last;
 
-💰 ${total.toFixed(2)}
-🔢 عمليات: ${count}
-
-⛽ ديزل: ${diesel.toFixed(2)}
-🟢 بنزين: ${petrolMoney.toFixed(2)}
-
-👤 المستخدمين:
-${txt}
-`);
+ adminBox.style.display="block";
 }
+
+function closeAdmin(){adminBox.style.display="none";}
 
 /* invoice */
 function printInvoice(){
