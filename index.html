@@ -73,7 +73,7 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 .green{background:#c9a24b;color:white}
 .red{background:#ef4444;color:white}
 
-/* 🧾 invoice */
+/* invoice */
 #invoiceBox{
  display:none;
  position:fixed;
@@ -144,13 +144,13 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 
 <div class="actions">
 <button class="btn green" onclick="startFuel()">ابدأ</button>
-<button class="btn" onclick="openLog()">📋 السجل</button>
+<button class="btn" onclick="openLog()">📋 التقرير</button>
 <button class="btn red" onclick="cancel()">إلغاء</button>
 </div>
 
 </div>
 
-<!-- 🧾 invoice -->
+<!-- invoice -->
 <div id="invoiceBox">
 <div class="invoice-card">
 <h3>🧾 فاتورة</h3>
@@ -162,31 +162,37 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 
 <script>
 
+/* Firebase */
 const firebaseConfig = {
  apiKey:"AIzaSyA...",
  databaseURL:"https://pkka7-a75c0-default-rtdb.firebaseio.com"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
 
+/* 👤 المستخدم */
+let currentUser="";
+
 /* login */
 function login(){
- if(user.value==="admin"&&pass.value==="1234"){
-  loginBox.style.display="none";
- }else alert("خطأ");
+ if(!user.value || !pass.value) return alert("ادخل البيانات");
+ currentUser=user.value;
+ loginBox.style.display="none";
 }
 
+/* data */
 let petrol=0,d1=0,d2=0,logs=[];
 let pump=null,input="",type="",price=0;
 
+/* init */
 db.ref("stock").once("value").then(s=>{
  if(!s.exists()){
   db.ref("stock").set({petrol:2000,d1:1000,d2:1000});
  }
 });
 
-db.ref("stock").on("value",s=>{
+/* load */
+db.ref("stock").on("value", s=>{
  let d=s.val();
  if(d){
   petrol=d.petrol;
@@ -198,11 +204,12 @@ db.ref("stock").on("value",s=>{
  }
 });
 
-db.ref("logs").on("value",s=>{
+db.ref("logs").on("value", s=>{
  logs=[];
  s.forEach(c=>logs.unshift(c.val()));
 });
 
+/* add stock */
 function addStock(t){
  let val=parseFloat(prompt("كم تريد إضافة؟"));
  if(!val)return;
@@ -212,6 +219,7 @@ function addStock(t){
  db.ref("stock").set({petrol,d1,d2});
 }
 
+/* pumps */
 function selectPump(p,t,pr){
  pump=p;type=t;price=pr;
  keypad.style.display="grid";
@@ -220,6 +228,7 @@ function selectPump(p,t,pr){
 function add(n){input+=n;display.innerText=input;}
 function clearInput(){input="";display.innerText="0";}
 
+/* start */
 function startFuel(){
  let money=parseFloat(input||0);
  if(!money)return;
@@ -234,36 +243,73 @@ function startFuel(){
 
  db.ref("stock").set({petrol,d1,d2});
 
- db.ref("logs").push({type:type,pump:pump,liters:liters,amount:money});
+ db.ref("logs").push({
+  type:type,
+  pump:pump,
+  liters:liters,
+  amount:money,
+  user:currentUser,
+  date:new Date().toLocaleDateString()
+ });
 
- /* 🧾 invoice */
  invText.innerHTML=`
+ 👤 ${currentUser}<br>
  نوع: ${type}<br>
- المضخة: ${pump}<br>
- المبلغ: ${money}<br>
- اللترات: ${liters.toFixed(2)}<br>
- السعر/لتر: ${price}
+ مضخة: ${pump}<br>
+ مبلغ: ${money}<br>
+ لترات: ${liters.toFixed(2)}
  `;
  invoiceBox.style.display="flex";
 
  input="";display.innerText="0";keypad.style.display="none";
 }
 
+/* التقرير */
+function openLog(){
+
+ let today=new Date().toLocaleDateString();
+
+ let total=0,count=0,diesel=0,petrolMoney=0,users={};
+
+ logs.forEach(l=>{
+  if(l.date===today){
+   total+=l.amount;
+   count++;
+
+   if(l.type==="ديزل") diesel+=l.liters;
+   if(l.type==="بنزين") petrolMoney+=l.amount;
+
+   if(!users[l.user]) users[l.user]=0;
+   users[l.user]+=l.amount;
+  }
+ });
+
+ let txt="";
+ for(let u in users){
+  txt+=`${u}: ${users[u].toFixed(2)}\n`;
+ }
+
+ alert(`
+📊 تقرير اليوم
+
+💰 ${total.toFixed(2)}
+🔢 عمليات: ${count}
+
+⛽ ديزل: ${diesel.toFixed(2)}
+🟢 بنزين: ${petrolMoney.toFixed(2)}
+
+👤 المستخدمين:
+${txt}
+`);
+}
+
+/* invoice */
 function printInvoice(){
  let w=window.open("","","width=300,height=400");
- w.document.write(`<h3>Fuel Pro</h3>`+invText.innerHTML);
+ w.document.write(invText.innerHTML);
  w.print();
 }
-
-function closeInvoice(){
- invoiceBox.style.display="none";
-}
-
-function openLog(){
- let total=0;
- logs.forEach(l=>total+=l.amount);
- alert("💰 مجموع: "+total);
-}
+function closeInvoice(){invoiceBox.style.display="none";}
 
 function cancel(){
  input="";display.innerText="0";keypad.style.display="none";
