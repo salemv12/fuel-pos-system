@@ -38,7 +38,6 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
  border-radius:25px;
  margin:20px 0;
  font-weight:bold;
- letter-spacing:3px;
  box-shadow:0 0 25px #00ff88;
  display:flex;
  align-items:center;
@@ -50,14 +49,13 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 .keypad{display:none;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
 .keypad button{padding:25px;font-size:22px}
 
-/* 🔥 buttons */
+/* buttons */
 .actions{
  display:grid;
  grid-template-columns:1fr 1fr;
  gap:15px;
  margin-top:15px;
 }
-
 .big-btn{
  font-size:24px;
  padding:20px;
@@ -65,7 +63,6 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
  border-radius:20px;
  font-weight:bold;
 }
-
 .start{background:#22c55e;color:white}
 .logs{background:#3b82f6;color:white}
 
@@ -81,8 +78,9 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
  margin:20px;
  padding:20px;
  border-radius:20px;
+ max-height:90vh;
+ overflow:auto;
 }
-
 .close-btn{
  width:100%;
  margin-top:20px;
@@ -141,7 +139,7 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 <button onclick="clearInput()">⌫</button>
 </div>
 
-<!-- 🔥 buttons -->
+<!-- buttons -->
 <div class="actions">
 <button class="big-btn start" onclick="startFuel()">⛽ ابدأ</button>
 <button class="big-btn logs" onclick="showLogs()">📄 السجل</button>
@@ -160,6 +158,7 @@ body{font-family:Arial;background:#f1f5f9;direction:rtl;margin:0}
 
 <script>
 
+/* Firebase */
 const firebaseConfig = {
  apiKey:"AIzaSyA7pNxijt03_TzDDNnwFbqhyUU-zcbJiq4",
  databaseURL:"https://pkka7-a75c0-default-rtdb.firebaseio.com"
@@ -167,24 +166,33 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
 
+/* عناصر */
+const logsModal = document.getElementById("logsModal");
+const logsBox = document.getElementById("logsBox");
+const display = document.getElementById("display");
+
+/* المستخدم */
 let currentUser="";
 
-/* login */
+/* تسجيل */
 function register(){
  db.ref("users/"+username.value).set({password:password.value});
- alert("تم");
+ alert("تم إنشاء الحساب");
 }
 
+/* دخول */
 function login(){
  db.ref("users/"+username.value).once("value").then(s=>{
-  if(s.val() && s.val().password===password.value){
+  if(s.exists() && s.val().password===password.value){
    currentUser=username.value;
    loginBox.style.display="none";
-  }else alert("خطأ");
+  }else{
+   alert("خطأ في البيانات");
+  }
  });
 }
 
-/* stock */
+/* المخزون */
 let stock={petrol:1000,diesel1:1000,diesel2:1000};
 
 db.ref("stock").on("value",s=>{
@@ -192,19 +200,29 @@ db.ref("stock").on("value",s=>{
  stockBox.innerHTML=`⛽ ${stock.petrol} | 🟡 ${stock.diesel1} | 🟡 ${stock.diesel2}`;
 });
 
-/* input */
+/* الإدخال */
 let type="",pumpName="",price=0,input="";
 
 function selectPump(t,name,p){
- type=t;pumpName=name;price=p;
+ type=t;
+ pumpName=name;
+ price=p;
  keypad.style.display="grid";
 }
 
-function add(n){input+=n;display.innerText=input;}
-function clearInput(){input="";display.innerText="0";}
+function add(n){
+ input+=n;
+ display.innerText=input;
+}
 
-/* start */
+function clearInput(){
+ input="";
+ display.innerText="0";
+}
+
+/* التشغيل */
 function startFuel(){
+
  let money=parseFloat(input||0);
  if(!money)return;
 
@@ -219,22 +237,36 @@ function startFuel(){
  db.ref("logs").push({
   type:pumpName,
   amount:money,
-  user:currentUser
+  liters:liters,
+  user:currentUser || "غير معروف",
+  date:new Date().toLocaleString()
  });
 
- input="";display.innerText="0";keypad.style.display="none";
+ // ❗ لا نمسح الشاشة
+ input="";
+ keypad.style.display="none";
 }
 
-/* logs */
+/* السجل */
 function showLogs(){
  db.ref("logs").once("value").then(s=>{
   let html="";
   s.forEach(c=>{
    let d=c.val();
-   html+=`<div>${d.type} - ${d.amount} - ${d.user}</div>`;
+
+   html+=`
+   <div style="background:#f1f5f9;padding:10px;margin:8px 0;border-radius:10px">
+   👤 ${d.user}<br>
+   ⛽ ${d.type}<br>
+   💰 ${d.amount} MRU<br>
+   🕒 ${d.date}
+   </div>
+   `;
   });
+
   logsBox.innerHTML=html;
  });
+
  logsModal.style.display="block";
 }
 
